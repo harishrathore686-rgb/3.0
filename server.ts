@@ -22,6 +22,7 @@ async function startServer() {
       status: "ok",
       timestamp: new Date().toISOString(),
       aiConfigured: !!ai,
+      nodeEnv: process.env.NODE_ENV,
     });
   });
 
@@ -142,18 +143,17 @@ Return a JSON object with:
     app.use(vite.middlewares);
 
     app.use(async (req, res, next) => {
-      const url = req.originalUrl;
-      const parsedUrl = path.parse(url);
+      const pathname = req.path;
       
       // Serve index.html or other requested pages
-      if (url === "/" || url === "" || url.endsWith(".html")) {
-        const file = url === "/" ? "index.html" : url.replace(/^\//, "");
+      if (pathname === "/" || pathname === "" || pathname.endsWith(".html")) {
+        const file = pathname === "/" ? "index.html" : pathname.replace(/^\//, "");
         const filePath = path.resolve(process.cwd(), file);
         
         if (fs.existsSync(filePath)) {
           try {
             const rawContent = fs.readFileSync(filePath, "utf-8");
-            const html = await vite.transformIndexHtml(url, rawContent);
+            const html = await vite.transformIndexHtml(req.originalUrl, rawContent);
             res.status(200).set({ "Content-Type": "text/html" }).end(html);
             return;
           } catch (err) {

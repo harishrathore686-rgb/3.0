@@ -1,0 +1,49 @@
+{
+  "entities": {
+    "user": {
+      "title": "User Profile",
+      "description": "User profile containing roles and identification info",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "email": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "role": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "googleSynced": { "type": "boolean" },
+        "gender": { "type": "string" },
+        "phone": { "type": "string" },
+        "district": { "type": "string" },
+        "age": { "type": "integer" },
+        "bloodGroup": { "type": "string" },
+        "digitalCardId": { "type": "string" }
+      },
+      "required": ["uid", "displayName", "email", "role"]
+    },
+    "alert": {
+      "title": "System Alert",
+      "description": "Critical Stockout or Outbreak Alert record added to the system",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["Critical Stockout", "Outbreak Alert"] },
+        "title": { "type": "string" },
+        "body": { "type": "string" },
+        "facility": { "type": "string" },
+        "severity": { "type": "string", "enum": ["danger", "warning", "emergency", "success", "blue", "cyan"] },
+        "createdAt": { "type": "object", "description": "Firestore server timestamp" }
+      },
+      "required": ["type", "title", "body", "facility", "severity", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "user",
+      "description": "User profile collection"
+    },
+    "/alerts/{alertId}": {
+      "schema": "alert",
+      "description": "System alerts and notifications collection"
+    }
+  }
+}

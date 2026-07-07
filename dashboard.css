@@ -347,3 +347,36 @@
   .dashboard-sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--border-color); }
   .dashboard-main { padding: 20px; }
 }
+
+/* Real-time D3 Hotspot styles */
+.d3-hotspot-pulse {
+  animation: d3-pulse 2.2s infinite ease-out;
+  pointer-events: none;
+}
+
+@keyframes d3-pulse {
+  0% {
+    r: 4px;
+    opacity: 1;
+    stroke-width: 1px;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    r: 28px;
+    opacity: 0;
+    stroke-width: 3px;
+  }
+}
+
+.d3-hotspot-core {
+  cursor: pointer;
+  transition: r 0.2s, filter 0.2s;
+}
+
+.d3-hotspot-core:hover {
+  r: 10px;
+  filter: drop-shadow(0 0 12px currentColor);
+}
+

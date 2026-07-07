@@ -1,0 +1,59 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Global Safety Net: default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Global helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Users Collection rules
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create, update: if isOwner(userId) && isValidUser(incoming());
+    }
+
+    function isValidUser(data) {
+      return data.uid is string && data.uid.size() <= 128
+        && data.displayName is string && data.displayName.size() <= 200
+        && data.email is string && data.email.size() <= 200
+        && data.role is string && data.role.size() <= 100;
+    }
+
+    // Alerts Collection rules
+    match /alerts/{alertId} {
+      allow read, list: if isSignedIn();
+      allow create: if isSignedIn() && isValidAlert(incoming());
+      allow update, delete: if false; // System alerts are immutable
+    }
+
+    function isValidAlert(data) {
+      return data.type is string && (data.type == 'Critical Stockout' || data.type == 'Outbreak Alert')
+        && data.title is string && data.title.size() <= 200
+        && data.body is string && data.body.size() <= 1000
+        && data.facility is string && data.facility.size() <= 200
+        && data.severity is string && (data.severity == 'danger' || data.severity == 'warning' || data.severity == 'emergency' || data.severity == 'success' || data.severity == 'blue' || data.severity == 'cyan')
+        && data.createdAt != null;
+    }
+  }
+}

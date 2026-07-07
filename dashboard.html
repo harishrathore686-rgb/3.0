@@ -133,27 +133,26 @@
               </div>
               
               <!-- Tab 1 Container (Epidemiology Map) -->
-              <div id="container-tab-epidemiology" class="map-vis-container" style="display: flex;">
-                <!-- SVG map vector representing Indian districts -->
-                <svg class="map-svg" viewBox="0 0 600 350">
-                  <g>
-                    <!-- Dhar District -->
-                    <path d="M 150,120 L 250,90 L 320,130 L 280,220 L 180,240 L 110,180 Z" class="map-district high-risk" name="Dhar District sector A" />
-                    <!-- Kukshi PHC -->
-                    <path d="M 250,90 L 350,70 L 400,120 L 320,130 Z" class="map-district" name="Kukshi CHC Sector B" />
-                    <!-- Badnawar sector -->
-                    <path d="M 320,130 L 400,120 L 460,180 L 410,230 L 280,220 Z" class="map-district" name="Badnawar PHC Sector C" />
-                    <!-- Sardarpur sector -->
-                    <path d="M 110,180 L 180,240 L 160,310 L 80,280 Z" class="map-district" name="Sardarpur Sector D" />
-                    <!-- Manawar sector -->
-                    <path d="M 180,240 L 280,220 L 310,310 L 220,330 Z" class="map-district high-risk" name="Manawar CHC Sector E" />
-                  </g>
-                  <circle cx="210" cy="160" r="6" fill="#ef4444" filter="drop-shadow(0 0 8px #ef4444)" />
-                  <text x="180" y="150" fill="#ffffff" font-size="10" font-weight="600">Cholera Spike Zone</text>
-                  
-                  <circle cx="280" cy="250" r="5" fill="#eab308" filter="drop-shadow(0 0 8px #eab308)" />
-                  <text x="290" y="255" fill="#ffffff" font-size="10" font-weight="600">Dengue Cluster</text>
-                </svg>
+              <div id="container-tab-epidemiology" class="map-vis-container" style="display: flex; flex-direction: column; position: relative;">
+                <!-- D3.js Map Render Target -->
+                <div id="d3-epidemiology-map" style="width: 100%; height: 100%; min-height: 350px; position: relative;"></div>
+                
+                <!-- Interactive Controls & Legend -->
+                <div class="map-legend-controls" style="display: flex; gap: 12px; padding: 10px 16px; background: rgba(7, 10, 19, 0.85); border-top: 1px solid var(--border-color); font-size: 0.75rem; justify-content: space-between; align-items: center; border-radius: 0 0 12px 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-weight: 700; color: var(--color-cyan); font-family: var(--font-mono); letter-spacing: 0.05em; font-size: 0.7rem;">FILTERS:</span>
+                    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; color: var(--text-secondary); font-weight: 500;">
+                      <input type="checkbox" checked id="filter-outbreaks" style="accent-color: var(--color-emergency); width: 13px; height: 13px;"> Outbreak Alerts
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; color: var(--text-secondary); font-weight: 500;">
+                      <input type="checkbox" checked id="filter-stockouts" style="accent-color: var(--color-warning); width: 13px; height: 13px;"> Stockout Alerts
+                    </label>
+                  </div>
+                  <div style="display: flex; gap: 12px; align-items: center;">
+                    <span style="display: flex; align-items: center; gap: 4px; color: var(--text-muted);"><span style="width: 8px; height: 8px; border-radius: 50%; background: #ef4444; display: inline-block; box-shadow: 0 0 6px #ef4444;"></span> Outbreak</span>
+                    <span style="display: flex; align-items: center; gap: 4px; color: var(--text-muted);"><span style="width: 8px; height: 8px; border-radius: 50%; background: #eab308; display: inline-block; box-shadow: 0 0 6px #eab308;"></span> Stockout</span>
+                  </div>
+                </div>
               </div>
               
               <!-- Tab 2 Container (Live Emergency Google Maps) -->
@@ -293,7 +292,7 @@
             </div>
 
             <!-- Microphone Voice Transcriber slot -->
-            <div class="glass-card glow-card" style="text-align:center;">
+            <div class="glass-card glow-card" style="text-align:center; margin-bottom: 24px;">
               <h3 style="font-size:1.1rem; margin-bottom:6px;">Voice-to-Dashboard Notes</h3>
               <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:12px;">Dictate emergency caseload notices directly to district operators.</p>
               
@@ -311,6 +310,56 @@
                 <div class="wave-bar"></div>
                 <div class="wave-bar"></div>
                 <div class="wave-bar"></div>
+              </div>
+            </div>
+
+            <!-- Real-time Alert Broadcaster -->
+            <div class="glass-card glow-card" style="padding:16px;">
+              <h3 style="font-size:1.1rem; margin-bottom:6px; display:flex; align-items:center; gap:8px;">
+                <span class="agent-pulse" style="width:8px; height:8px; background:var(--color-emergency);"></span>
+                Real-time Alert Broadcaster
+              </h3>
+              <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:12px;">Publish critical stockouts or outbreak events to the real-time Firestore database.</p>
+              
+              <div style="display:flex; flex-direction:column; gap:10px;">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                  <button class="btn btn-secondary text-xs" style="padding:8px 6px; font-size:0.75rem; justify-content:center;" id="btn-quick-stockout">⚡ Stockout</button>
+                  <button class="btn btn-secondary text-xs" style="padding:8px 6px; font-size:0.75rem; justify-content:center;" id="btn-quick-outbreak">🦠 Outbreak</button>
+                </div>
+                
+                <details style="cursor:pointer;" id="custom-alert-details">
+                  <summary style="font-size:0.8rem; color:var(--color-cyan); margin-top:4px; outline:none; user-select:none;">Create Custom Alert...</summary>
+                  <div style="display:flex; flex-direction:column; gap:8px; background:rgba(255,255,255,0.01); padding:10px 0 0 0; cursor:default;" onclick="event.stopPropagation();">
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                      <label style="font-size:0.7rem; color:var(--text-secondary); font-weight:600;">ALERT TYPE</label>
+                      <select id="alert-type-select" style="background:rgba(7,10,19,0.9); border:1px solid var(--border-color); border-radius:6px; padding:6px; color:#fff; font-size:0.8rem; outline:none;">
+                        <option value="Critical Stockout">Critical Stockout</option>
+                        <option value="Outbreak Alert">Outbreak Alert</option>
+                      </select>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                      <label style="font-size:0.7rem; color:var(--text-secondary); font-weight:600;">TITLE</label>
+                      <input type="text" id="alert-title-input" placeholder="e.g. Oseltamivir Exhaustion" style="background:rgba(7,10,19,0.9); border:1px solid var(--border-color); border-radius:6px; padding:6px; color:#fff; font-size:0.8rem; outline:none;">
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                      <label style="font-size:0.7rem; color:var(--text-secondary); font-weight:600;">LOCATION / FACILITY</label>
+                      <input type="text" id="alert-facility-input" placeholder="e.g. Manawar CHC" style="background:rgba(7,10,19,0.9); border:1px solid var(--border-color); border-radius:6px; padding:6px; color:#fff; font-size:0.8rem; outline:none;">
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                      <label style="font-size:0.7rem; color:var(--text-secondary); font-weight:600;">SEVERITY</label>
+                      <select id="alert-severity-select" style="background:rgba(7,10,19,0.9); border:1px solid var(--border-color); border-radius:6px; padding:6px; color:#fff; font-size:0.8rem; outline:none;">
+                        <option value="danger">Danger (Red)</option>
+                        <option value="emergency">Emergency (Rose)</option>
+                        <option value="warning">Warning (Yellow)</option>
+                      </select>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                      <label style="font-size:0.7rem; color:var(--text-secondary); font-weight:600;">ALERT BODY</label>
+                      <textarea id="alert-body-input" rows="2" placeholder="Describe the stockout or outbreak details..." style="background:rgba(7,10,19,0.9); border:1px solid var(--border-color); border-radius:6px; padding:6px; color:#fff; font-size:0.8rem; resize:none; outline:none; font-family:var(--font-sans);"></textarea>
+                    </div>
+                    <button class="btn btn-primary" id="btn-submit-alert" style="padding:8px; font-size:0.8rem; justify-content:center; margin-top:4px;">Publish Alert to Firestore</button>
+                  </div>
+                </details>
               </div>
             </div>
           </div>

@@ -3,6 +3,10 @@
  * Dynamic data visualizers, District Digital Twin simulations, interactive maps, and AI Agent managers.
  */
 
+import { db } from "./auth.js";
+import { collection, addDoc, serverTimestamp, onSnapshot, query, orderBy } from "firebase/firestore";
+import * as d3 from "d3";
+
 class DashboardController {
   constructor() {
     this.weatherData = { temp: "28°C", condition: "Partly Cloudy", aqi: "42 (Good)" };
@@ -17,6 +21,11 @@ class DashboardController {
       confidenceScore: 94
     };
 
+    this.polylines = [];
+    this.hospitals = {};
+    this.selectedHospitalKey = 'dhar';
+    this.emergencyUIBound = false;
+
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => this.init());
     } else {
@@ -30,6 +39,7 @@ class DashboardController {
     this.bindInteractiveEvents();
     this.simulateRealtimeUpdates();
     this.setupAIAgentDials();
+    this.initD3EpidemiologyMap();
   }
 
   startLiveClock() {
@@ -164,6 +174,102 @@ class DashboardController {
     if (tabEpidemiology && tabEmergency) {
       tabEpidemiology.addEventListener('click', () => this.switchTab('epidemiology'));
       tabEmergency.addEventListener('click', () => this.switchTab('emergency'));
+    }
+
+    // Real-time Alert Broadcaster bindings
+    const btnStockout = document.getElementById('btn-quick-stockout');
+    const btnOutbreak = document.getElementById('btn-quick-outbreak');
+    const btnSubmitAlert = document.getElementById('btn-submit-alert');
+    
+    if (btnStockout) {
+      btnStockout.addEventListener('click', () => this.publishQuickAlert('Critical Stockout'));
+    }
+    if (btnOutbreak) {
+      btnOutbreak.addEventListener('click', () => this.publishQuickAlert('Outbreak Alert'));
+    }
+    if (btnSubmitAlert) {
+      btnSubmitAlert.addEventListener('click', () => this.publishCustomAlert());
+    }
+  }
+
+  async publishQuickAlert(type) {
+    let title = "";
+    let body = "";
+    let facility = "";
+    let severity = "";
+    
+    if (type === 'Critical Stockout') {
+      title = "Anti-Rabies Vaccine Depletion";
+      body = "Zero stock reported at PHC. Critical rabies triage compromised. Emergency drone restock recommended.";
+      facility = "Badnawar PHC";
+      severity = "danger";
+    } else {
+      title = "Dengue Cluster Multiplication";
+      body = "Fever caseload exceeding 4.2x standard deviation threshold in block sector E. Spatiotemporal vector spraying needed.";
+      facility = "Manawar CHC Sector E";
+      severity = "emergency";
+    }
+    
+    try {
+      console.log(`Publishing quick ${type}...`);
+      await addDoc(collection(db, "alerts"), {
+        type,
+        title,
+        body,
+        facility,
+        severity,
+        createdAt: serverTimestamp()
+      });
+      window.PrahariNotifications.show("Alert Published", `Quick ${type} published to cloud Firestore!`, "success");
+    } catch (error) {
+      console.error("Failed to publish quick alert:", error);
+      window.PrahariNotifications.show("Publish Failed", error.message, "danger");
+    }
+  }
+
+  async publishCustomAlert() {
+    const typeSelect = document.getElementById('alert-type-select');
+    const titleInput = document.getElementById('alert-title-input');
+    const facilityInput = document.getElementById('alert-facility-input');
+    const severitySelect = document.getElementById('alert-severity-select');
+    const bodyInput = document.getElementById('alert-body-input');
+    
+    if (!titleInput || !bodyInput) return;
+    
+    const type = typeSelect.value;
+    const title = titleInput.value.trim();
+    const facility = facilityInput.value.trim() || "Dhar District Hospital";
+    const severity = severitySelect.value;
+    const body = bodyInput.value.trim();
+    
+    if (!title || !body) {
+      window.PrahariNotifications.show("Missing Fields", "Please enter a title and description for the custom alert.", "warning");
+      return;
+    }
+    
+    try {
+      console.log(`Publishing custom ${type}...`);
+      await addDoc(collection(db, "alerts"), {
+        type,
+        title,
+        body,
+        facility,
+        severity,
+        createdAt: serverTimestamp()
+      });
+      
+      // Reset inputs
+      titleInput.value = "";
+      bodyInput.value = "";
+      facilityInput.value = "";
+      
+      const details = document.getElementById('custom-alert-details');
+      if (details) details.removeAttribute('open');
+      
+      window.PrahariNotifications.show("Alert Published", `Custom ${type} published to cloud Firestore!`, "success");
+    } catch (error) {
+      console.error("Failed to publish custom alert:", error);
+      window.PrahariNotifications.show("Publish Failed", error.message, "danger");
     }
   }
 
@@ -319,6 +425,333 @@ class DashboardController {
     // Generate beautiful interactive indicators inside agent cards if desired
   }
 
+  initD3EpidemiologyMap() {
+    const mapContainer = document.getElementById('d3-epidemiology-map');
+    if (!mapContainer) return;
+
+    // Clear previous contents if any
+    mapContainer.innerHTML = '';
+
+    const width = 600;
+    const height = 350;
+
+    // Create SVG
+    const svg = d3.select("#d3-epidemiology-map")
+      .append("svg")
+      .attr("viewBox", `0 0 ${width} ${height}`)
+      .attr("width", "100%")
+      .attr("height", "100%")
+      .style("background", "transparent")
+      .style("overflow", "visible");
+
+    // Add tooltip element
+    const tooltip = d3.select("#d3-epidemiology-map")
+      .append("div")
+      .style("position", "absolute")
+      .style("visibility", "hidden")
+      .style("background", "rgba(7, 10, 19, 0.95)")
+      .style("border", "1px solid var(--border-color)")
+      .style("padding", "8px 12px")
+      .style("border-radius", "8px")
+      .style("font-size", "0.75rem")
+      .style("color", "#fff")
+      .style("pointer-events", "none")
+      .style("z-index", "100")
+      .style("box-shadow", "0 4px 20px rgba(0,0,0,0.5)");
+
+    const SECTORS = [
+      {
+        id: "dhar-sector-a",
+        name: "Dhar District sector A",
+        path: "M 150,120 L 250,90 L 320,130 L 280,220 L 180,240 L 110,180 Z",
+        baseRisk: "HIGH",
+        class: "high-risk",
+        cx: 210,
+        cy: 160
+      },
+      {
+        id: "kukshi-sector-b",
+        name: "Kukshi CHC Sector B",
+        path: "M 250,90 L 350,70 L 400,120 L 320,130 Z",
+        baseRisk: "NORMAL",
+        class: "",
+        cx: 320,
+        cy: 100
+      },
+      {
+        id: "badnawar-sector-c",
+        name: "Badnawar PHC Sector C",
+        path: "M 320,130 L 400,120 L 460,180 L 410,230 L 280,220 Z",
+        baseRisk: "NORMAL",
+        class: "",
+        cx: 370,
+        cy: 180
+      },
+      {
+        id: "sardarpur-sector-d",
+        name: "Sardarpur Sector D",
+        path: "M 110,180 L 180,240 L 160,310 L 80,280 Z",
+        baseRisk: "NORMAL",
+        class: "",
+        cx: 130,
+        cy: 230
+      },
+      {
+        id: "manawar-sector-e",
+        name: "Manawar CHC Sector E",
+        path: "M 180,240 L 280,220 L 310,310 L 220,330 Z",
+        baseRisk: "HIGH",
+        class: "high-risk",
+        cx: 230,
+        cy: 270
+      }
+    ];
+
+    // Render static sectors paths using D3
+    const sectorsGroup = svg.append("g").attr("class", "sectors-group");
+
+    sectorsGroup.selectAll("path")
+      .data(SECTORS)
+      .enter()
+      .append("path")
+      .attr("d", d => d.path)
+      .attr("class", d => `map-district ${d.class}`)
+      .attr("id", d => d.id)
+      .style("cursor", "pointer")
+      .on("click", (event, d) => {
+        const risk = d.baseRisk === "HIGH" ? "HIGH (Water-borne outbreak warning)" : "NORMAL";
+        this.showDistrictDetails(d.name, risk);
+      })
+      .on("mouseover", function(event, d) {
+        d3.select(this)
+          .transition()
+          .duration(150)
+          .style("fill-opacity", 0.4);
+        
+        tooltip.style("visibility", "visible")
+          .html(`
+            <div style="font-weight: 700; color: var(--color-cyan); margin-bottom: 4px;">${d.name}</div>
+            <div style="font-size: 0.7rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 2px;">
+              <div>Status: <span style="font-weight: 600; color: ${d.baseRisk === "HIGH" ? "var(--color-danger)" : "var(--color-success)"}">${d.baseRisk}</span></div>
+              <div>Waterborne risk monitoring active</div>
+              <div style="color: var(--text-muted); font-size: 0.65rem; margin-top: 4px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 4px;">Click to view Digital Twin models</div>
+            </div>
+          `);
+      })
+      .on("mousemove", function(event) {
+        const bounds = mapContainer.getBoundingClientRect();
+        const mouseX = event.clientX - bounds.left;
+        const mouseY = event.clientY - bounds.top;
+        tooltip.style("left", `${mouseX + 15}px`)
+          .style("top", `${mouseY + 15}px`);
+      })
+      .on("mouseout", function() {
+        d3.select(this)
+          .transition()
+          .duration(150)
+          .style("fill-opacity", null);
+        tooltip.style("visibility", "hidden");
+      });
+
+    // Create group for hotspots/markers
+    const hotspotsGroup = svg.append("g").attr("class", "hotspots-group");
+
+    // Local array for active alerts
+    let activeAlerts = [];
+    let showOutbreaks = true;
+    let showStockouts = true;
+
+    // Helper to map alerts to coordinates
+    const mapAlertToCoordinates = (alert) => {
+      const facility = (alert.facility || "").toLowerCase();
+      const title = (alert.title || "").toLowerCase();
+      const body = (alert.body || "").toLowerCase();
+
+      if (facility.includes("kukshi")) return { cx: 320, cy: 100, sector: "Kukshi CHC Sector B" };
+      if (facility.includes("badnawar")) return { cx: 370, cy: 180, sector: "Badnawar PHC Sector C" };
+      if (facility.includes("sardarpur")) return { cx: 130, cy: 230, sector: "Sardarpur Sector D" };
+      if (facility.includes("manawar")) return { cx: 230, cy: 270, sector: "Manawar CHC Sector E" };
+      if (facility.includes("dhar")) return { cx: 210, cy: 160, sector: "Dhar District sector A" };
+      
+      if (title.includes("kukshi") || body.includes("kukshi")) return { cx: 320, cy: 100, sector: "Kukshi CHC Sector B" };
+      if (title.includes("badnawar") || body.includes("badnawar")) return { cx: 370, cy: 180, sector: "Badnawar PHC Sector C" };
+      if (title.includes("sardarpur") || body.includes("sardarpur")) return { cx: 130, cy: 230, sector: "Sardarpur Sector D" };
+      if (title.includes("manawar") || body.includes("manawar")) return { cx: 230, cy: 270, sector: "Manawar CHC Sector E" };
+      
+      return { cx: 210, cy: 160, sector: "Dhar District sector A" };
+    };
+
+    // Redraw Hotspots function using D3 enter/update/exit pattern
+    const updateHotspots = () => {
+      // Filter alerts based on checkboxes
+      const filtered = activeAlerts.filter(alert => {
+        const type = (alert.type || "").toLowerCase();
+        const isOutbreak = type.includes("outbreak") || type.includes("infection") || type.includes("epidemic") || type.includes("fever") || type.includes("cholera");
+        const isStockout = type.includes("stock") || type.includes("inventory") || type.includes("shortage") || type.includes("supply") || type.includes("drug") || type.includes("vaccine");
+        
+        if (isOutbreak && !showOutbreaks) return false;
+        if (isStockout && !showStockouts) return false;
+        return true;
+      });
+
+      // Bind data to hotspots selection
+      const selection = hotspotsGroup.selectAll("g.hotspot")
+        .data(filtered, d => d.id);
+
+      // EXIT old elements
+      selection.exit()
+        .transition()
+        .duration(300)
+        .style("opacity", 0)
+        .remove();
+
+      // ENTER new elements
+      const enterG = selection.enter()
+        .append("g")
+        .attr("class", "hotspot")
+        .style("opacity", 0);
+
+      enterG.transition()
+        .duration(500)
+        .style("opacity", 1);
+
+      // Append pulsating outer circle for hotspots
+      enterG.append("circle")
+        .attr("cx", d => mapAlertToCoordinates(d).cx)
+        .attr("cy", d => mapAlertToCoordinates(d).cy)
+        .attr("class", "d3-hotspot-pulse")
+        .attr("fill", d => {
+          const type = (d.type || "").toLowerCase();
+          return type.includes("stock") ? "#eab308" : "#ef4444";
+        })
+        .attr("stroke", d => {
+          const type = (d.type || "").toLowerCase();
+          return type.includes("stock") ? "#eab308" : "#ef4444";
+        });
+
+      // Append core circle
+      enterG.append("circle")
+        .attr("cx", d => mapAlertToCoordinates(d).cx)
+        .attr("cy", d => mapAlertToCoordinates(d).cy)
+        .attr("r", 5.5)
+        .attr("class", "d3-hotspot-core")
+        .attr("fill", d => {
+          const type = (d.type || "").toLowerCase();
+          return type.includes("stock") ? "#eab308" : "#ef4444";
+        })
+        .style("cursor", "pointer")
+        .style("filter", d => {
+          const type = (d.type || "").toLowerCase();
+          const color = type.includes("stock") ? "#eab308" : "#ef4444";
+          return `drop-shadow(0 0 6px ${color})`;
+        })
+        .on("click", (event, d) => {
+          const mapped = mapAlertToCoordinates(d);
+          this.showDistrictDetails(mapped.sector, `HIGH (${d.title})`);
+        })
+        .on("mouseover", function(event, d) {
+          const mapped = mapAlertToCoordinates(d);
+          d3.select(this)
+            .transition()
+            .duration(100)
+            .attr("r", 8);
+
+          tooltip.style("visibility", "visible")
+            .html(`
+              <div style="font-weight: 700; color: ${d.type && d.type.toLowerCase().includes("stock") ? "var(--color-warning)" : "var(--color-emergency)"}; margin-bottom: 4px;">⚠️ ${d.type || "Infection Hotspot"}</div>
+              <div style="font-weight: 600; color: #fff; margin-bottom: 2px;">${d.title}</div>
+              <div style="font-size: 0.7rem; color: var(--text-secondary); max-width: 220px; word-wrap: break-word; margin-bottom: 4px;">${d.body || ""}</div>
+              <div style="font-size: 0.65rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 2px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 4px;">
+                <div>Sector: <span style="font-weight: 600; color: #fff;">${mapped.sector}</span></div>
+                <div>Facility: <span style="font-weight: 600; color: #fff;">${d.facility || "District HQ"}</span></div>
+                <div>Severity: <span style="font-weight:600; color:${d.severity === 'Danger' || d.severity === 'Emergency' ? '#ef4444' : '#eab308'}">${d.severity || "Critical"}</span></div>
+              </div>
+            `);
+        })
+        .on("mousemove", function(event) {
+          const bounds = mapContainer.getBoundingClientRect();
+          const mouseX = event.clientX - bounds.left;
+          const mouseY = event.clientY - bounds.top;
+          tooltip.style("left", `${mouseX + 15}px`)
+            .style("top", `${mouseY + 15}px`);
+        })
+        .on("mouseout", function() {
+          d3.select(this)
+            .transition()
+            .duration(150)
+            .attr("r", 5.5);
+          tooltip.style("visibility", "hidden");
+        });
+
+      // UPDATE existing elements if coordinates or styling changes
+      const updateG = selection;
+      updateG.selectAll(".d3-hotspot-core")
+        .attr("fill", d => {
+          const type = (d.type || "").toLowerCase();
+          return type.includes("stock") ? "#eab308" : "#ef4444";
+        });
+    };
+
+    // Listen to changes in Firestore 'alerts' collection in real-time
+    const q = query(collection(db, "alerts"), orderBy("createdAt", "desc"));
+    this.alertsListenerUnsubscribe = onSnapshot(q, (snapshot) => {
+      activeAlerts = [];
+      snapshot.forEach(doc => {
+        activeAlerts.push({ id: doc.id, ...doc.data() });
+      });
+
+      // Fallback: If Firebase is clean or empty, add initial default hotspots for rich user experience
+      if (activeAlerts.length === 0) {
+        activeAlerts = [
+          {
+            id: "default-1",
+            type: "Outbreak Alert",
+            title: "Acute Cholera Spike Detected",
+            body: "Pathogen concentration high in drinking reservoirs of District sector A",
+            facility: "Dhar District Hospital (HQ)",
+            severity: "Emergency"
+          },
+          {
+            id: "default-2",
+            type: "Stockout Alert",
+            title: "IV Fluids Shortage Critical",
+            body: "Normal saline reserve depleted to 14% due to infection surge",
+            facility: "Manawar Community Health Centre",
+            severity: "Danger"
+          },
+          {
+            id: "default-3",
+            type: "Outbreak Alert",
+            title: "Dengue Cluster Active",
+            body: "Larval breeding indexes exceeded threshold in Sector B",
+            facility: "Kukshi Community Health Centre",
+            severity: "Warning"
+          }
+        ];
+      }
+
+      updateHotspots();
+    });
+
+    // Wire up checkbox toggles
+    const outbreakToggle = document.getElementById('filter-outbreaks');
+    const stockoutToggle = document.getElementById('filter-stockouts');
+
+    if (outbreakToggle) {
+      outbreakToggle.addEventListener('change', (e) => {
+        showOutbreaks = e.target.checked;
+        updateHotspots();
+      });
+    }
+
+    if (stockoutToggle) {
+      stockoutToggle.addEventListener('change', (e) => {
+        showStockouts = e.target.checked;
+        updateHotspots();
+      });
+    }
+  }
+
   switchTab(tab) {
     const btnEpidemiology = document.getElementById('tab-btn-epidemiology');
     const btnEmergency = document.getElementById('tab-btn-emergency');
@@ -458,6 +891,8 @@ class DashboardController {
           </div>
         </div>
       `;
+      this.bindEmergencyUIEvents();
+      this.handleHospitalSelectionChange('dhar');
       return;
     }
     
@@ -545,6 +980,16 @@ class DashboardController {
       this.markers.push(marker);
     });
 
+    this.bindEmergencyUIEvents();
+
+    // Sync initial selection
+    this.handleHospitalSelectionChange('dhar');
+  }
+
+  bindEmergencyUIEvents() {
+    if (this.emergencyUIBound) return;
+    this.emergencyUIBound = true;
+
     // Bind dropdown selection
     const select = document.getElementById('emergency-hospital-select');
     if (select) {
@@ -563,9 +1008,6 @@ class DashboardController {
     if (dispatchBtn) {
       dispatchBtn.addEventListener('click', () => this.dispatchAmbulanceFlow());
     }
-
-    // Sync initial selection
-    this.handleHospitalSelectionChange('dhar');
   }
 
   handleHospitalSelectionChange(key) {
@@ -673,6 +1115,25 @@ class DashboardController {
   }
 
   fallbackRouteDisplay(origin, destination) {
+    const R = 6371; // Earth's radius in km
+    const dLat = (destination.lat - origin.lat) * Math.PI / 180;
+    const dLng = (destination.lng - origin.lng) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(origin.lat * Math.PI / 180) * Math.cos(destination.lat * Math.PI / 180) *
+              Math.sin(dLng/2) * Math.sin(dLng/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const dist = (R * c * 1.3).toFixed(1); 
+    const mins = Math.round(dist * 1.4);
+    
+    if (window.PrahariNotifications) {
+      window.PrahariNotifications.show(
+        "Low-Traffic Corridor Locked", 
+        `Routed via bypass NH-47: ${dist} km, ETA: ${mins} mins under low-traffic bypass.`, 
+        "success",
+        6000
+      );
+    }
+
     if (!this.mapsLib) return;
     
     const path = [
@@ -695,25 +1156,6 @@ class DashboardController {
     const bounds = new this.mapsLib.LatLngBounds();
     path.forEach(pt => bounds.extend(pt));
     this.map.fitBounds(bounds);
-    
-    const R = 6371; // Earth's radius in km
-    const dLat = (destination.lat - origin.lat) * Math.PI / 180;
-    const dLng = (destination.lng - origin.lng) * Math.PI / 180;
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(origin.lat * Math.PI / 180) * Math.cos(destination.lat * Math.PI / 180) *
-              Math.sin(dLng/2) * Math.sin(dLng/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    const dist = (R * c * 1.3).toFixed(1); 
-    const mins = Math.round(dist * 1.4);
-    
-    if (window.PrahariNotifications) {
-      window.PrahariNotifications.show(
-        "Low-Traffic Corridor Locked", 
-        `Routed via bypass NH-47: ${dist} km, ETA: ${mins} mins under low-traffic bypass.`, 
-        "success",
-        6000
-      );
-    }
   }
 
   dispatchAmbulanceFlow() {

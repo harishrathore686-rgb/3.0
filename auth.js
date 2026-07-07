@@ -17,23 +17,20 @@ import {
   getFirestore, 
   doc, 
   setDoc, 
-  getDoc 
+  getDoc,
+  collection,
+  query,
+  onSnapshot,
+  addDoc,
+  serverTimestamp
 } from "firebase/firestore";
 
-// Config from firebase-applet-config.json
-const firebaseConfig = {
-  apiKey: "AIzaSyCA-3F458_fxg-PMyOykXdK2FGw3IvwhrE",
-  authDomain: "active-zepplin-rfs6l.firebaseapp.com",
-  projectId: "active-zepplin-rfs6l",
-  storageBucket: "active-zepplin-rfs6l.firebasestorage.app",
-  messagingSenderId: "162727691095",
-  appId: "1:162727691095:web:226dc592c9c2154063f412"
-};
+import firebaseConfig from "./firebase-applet-config.json";
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app);
+const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 
 // Provider
 const googleProvider = new GoogleAuthProvider();
@@ -54,6 +51,8 @@ class AuthController {
     this.currentUser = null;
     this.userProfile = null;
     this.activeRole = localStorage.getItem('prahari-active-role') || ROLES.DOCTOR;
+    this.alertsListenerUnsubscribe = null;
+    this.sessionStartTime = new Date();
     
     this.initListeners();
   }
@@ -65,10 +64,83 @@ class AuthController {
         // Fetch or create user document in Firestore
         await this.syncUserProfile(user);
         this.dispatchAuthEvent('login', { user, profile: this.userProfile });
+        
+        // Setup persistent real-time notifications listener
+        if (this.alertsListenerUnsubscribe) {
+          this.alertsListenerUnsubscribe();
+        }
+        this.alertsListenerUnsubscribe = this.startRealtimeAlertsListener();
       } else {
         this.userProfile = null;
+        if (this.alertsListenerUnsubscribe) {
+          this.alertsListenerUnsubscribe();
+          this.alertsListenerUnsubscribe = null;
+        }
         this.dispatchAuthEvent('logout', null);
       }
+    });
+  }
+
+  handleFirestoreError(error, operationType, path) {
+    const errInfo = {
+      error: error instanceof Error ? error.message : String(error),
+      authInfo: {
+        userId: auth.currentUser?.uid,
+        email: auth.currentUser?.email,
+        emailVerified: auth.currentUser?.emailVerified,
+        isAnonymous: auth.currentUser?.isAnonymous,
+        tenantId: auth.currentUser?.tenantId,
+        providerInfo: auth.currentUser?.providerData?.map(provider => ({
+          providerId: provider.providerId,
+          email: provider.email,
+        })) || []
+      },
+      operationType,
+      path
+    };
+    console.error('Firestore Error: ', JSON.stringify(errInfo));
+    throw new Error(JSON.stringify(errInfo));
+  }
+
+  startRealtimeAlertsListener() {
+    const alertsCollection = collection(db, "alerts");
+    console.log("Initializing persistent real-time notification listener on '/alerts'...");
+    
+    return onSnapshot(alertsCollection, (snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        if (change.type === "added") {
+          const data = change.doc.data();
+          const type = data.type;
+          
+          if (type === "Critical Stockout" || type === "Outbreak Alert") {
+            let isNew = false;
+            if (data.createdAt) {
+              const createdAtDate = data.createdAt.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
+              if (createdAtDate >= this.sessionStartTime) {
+                isNew = true;
+              }
+            } else {
+              // If createdAt is null (pending server timestamp), treat it as new
+              isNew = true;
+            }
+            
+            if (isNew) {
+              console.log("Real-time alert captured:", data);
+              if (window.PrahariNotifications) {
+                // Show real-time notification
+                window.PrahariNotifications.show(
+                  `${type.toUpperCase()}: ${data.title}`,
+                  `${data.body} (Location: ${data.facility})`,
+                  data.severity || 'danger',
+                  8000
+                );
+              }
+            }
+          }
+        }
+      });
+    }, (error) => {
+      this.handleFirestoreError(error, 'list', 'alerts');
     });
   }
 
