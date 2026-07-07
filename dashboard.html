@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Command Center - Prahari OS</title>
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/dashboard.css" />
+    <link rel="stylesheet" href="/animations.css" />
+  </head>
+  <body>
+    <!-- Global background glow nodes -->
+    <div class="glow-orb-1"></div>
+    <div class="glow-orb-2"></div>
+
+    <!-- Navigation Header -->
+    <nav class="main-nav">
+      <div class="nav-brand">
+        <div class="brand-logo-container" style="cursor: pointer;" onclick="window.location.href='index.html'">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </div>
+        <span class="brand-name">PRAHARI</span>
+      </div>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="dashboard.html" class="nav-link active">Dashboard</a>
+        <a href="citizen.html" class="nav-link">Citizen platform</a>
+        <a href="admin.html" class="nav-link">Governance</a>
+        <a href="settings.html" class="nav-link">Settings</a>
+      </div>
+      <div class="nav-controls">
+        <button class="btn btn-secondary" onclick="PrahariSearch.open()" style="padding: 6px 12px; font-size:0.85rem; display:flex; align-items:center; gap:8px;">
+          <span>🔍</span> Search <span class="shortcut-badge">Ctrl+K</span>
+        </button>
+        <div id="nav-user-avatar-block">
+          <!-- Populated by script.js -->
+        </div>
+      </div>
+    </nav>
+
+    <!-- App Body Container -->
+    <div class="dashboard-container">
+      <!-- Sidebar Panel -->
+      <aside class="dashboard-sidebar">
+        <div class="sidebar-section">
+          <span class="sidebar-title">COMMAND CONTROLS</span>
+          <ul class="sidebar-menu">
+            <li><a href="dashboard.html" class="sidebar-item-link active">📊 System Metrics</a></li>
+            <li><a href="citizen.html" class="sidebar-item-link">👤 Citizen Platform</a></li>
+            <li><a href="admin.html" class="sidebar-item-link">🛡 Governance Portal</a></li>
+          </ul>
+        </div>
+        <div class="sidebar-section">
+          <span class="sidebar-title">OPERATOR PREFERENCES</span>
+          <ul class="sidebar-menu">
+            <li><a href="profile.html" class="sidebar-item-link">🆔 Identity Hub</a></li>
+            <li><a href="settings.html" class="sidebar-item-link">⚙️ OS Configuration</a></li>
+          </ul>
+        </div>
+        
+        <!-- Live System Node block -->
+        <div style="margin-top:auto; background:rgba(255,255,255,0.02); border:1px solid var(--border-color); border-radius:12px; padding:16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <span style="font-size:0.75rem; color:var(--text-muted); font-weight:700;">DHC KERNEL</span>
+            <span style="width:8px; height:8px; border-radius:50%; background:var(--color-success); box-shadow:0 0 6px var(--color-success);"></span>
+          </div>
+          <div style="font-family:var(--font-mono); font-size:0.8rem; color:var(--text-secondary);">active-zepplin-rfs6l</div>
+          <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Secure Firestore Connected</div>
+        </div>
+      </aside>
+
+      <!-- Main Command Board -->
+      <main class="dashboard-main">
+        <!-- Header row -->
+        <div class="dashboard-header-block">
+          <div class="dashboard-title-area">
+            <h1 style="font-size:2rem; letter-spacing:-0.03em;">District AI Command Center</h1>
+            <p class="dashboard-subtitle">Real-time predictive telemetry for Dhar District & surrounding PHCs</p>
+          </div>
+          <div style="text-align:right;">
+            <div id="dashboard-live-clock" style="font-size:1.1rem; margin-bottom:4px;">--:--:--</div>
+            <div style="font-size:0.8rem; color:var(--text-secondary);">Dhar Local Temp: <span style="color:var(--color-cyan); font-weight:600;">28°C</span> • AQI: <span style="color:var(--color-success); font-weight:600;">42 (Good)</span></div>
+          </div>
+        </div>
+
+        <!-- Top high-level metrics ticker -->
+        <div style="display:grid; grid-template-columns:repeat(5, 1fr); gap:16px;">
+          <div class="glass-card" style="padding:16px;">
+            <span style="font-size:0.75rem; color:var(--text-muted); font-weight:700; text-transform:uppercase;">Bed Availability</span>
+            <div style="font-size:1.6rem; font-weight:700; font-family:var(--font-display); color:var(--color-cyan);" id="stat-bed-counter">84%</div>
+            <span style="font-size:0.75rem; color:var(--text-secondary);">142 Wards Vacant</span>
+          </div>
+          <div class="glass-card" style="padding:16px;">
+            <span style="font-size:0.75rem; color:var(--text-muted); font-weight:700; text-transform:uppercase;">Medicine Reserves</span>
+            <div style="font-size:1.6rem; font-weight:700; font-family:var(--font-display); color:var(--color-cyan);" id="stat-medicine-counter">91%</div>
+            <span style="font-size:0.75rem; color:var(--color-success); font-weight:500;">DHC Stock Optimal</span>
+          </div>
+          <div class="glass-card" style="padding:16px;">
+            <span style="font-size:0.75rem; color:var(--text-muted); font-weight:700; text-transform:uppercase;">Doctor Attendance</span>
+            <div style="font-size:1.6rem; font-weight:700; font-family:var(--font-display); color:var(--color-cyan);">96%</div>
+            <span style="font-size:0.75rem; color:var(--text-secondary);">24/25 Operatives On-Duty</span>
+          </div>
+          <div class="glass-card" style="padding:16px;">
+            <span style="font-size:0.75rem; color:var(--text-muted); font-weight:700; text-transform:uppercase;">District Health Score</span>
+            <div style="font-size:1.6rem; font-weight:700; font-family:var(--font-display); color:var(--color-cyan);" id="stat-health-counter">89/100</div>
+            <span style="font-size:0.75rem; color:var(--color-success); font-weight:500;">✓ Epidemic Risk Safe</span>
+          </div>
+          <div class="glass-card" style="padding:16px;">
+            <span style="font-size:0.75rem; color:var(--text-muted); font-weight:700; text-transform:uppercase;">AI Engine Confidence</span>
+            <div style="font-size:1.6rem; font-weight:700; font-family:var(--font-display); color:var(--color-cyan);">94.1%</div>
+            <span style="font-size:0.75rem; color:var(--text-secondary);">Google Grounding Active</span>
+          </div>
+        </div>
+
+        <!-- Bento Layout Board -->
+        <div class="bento-grid">
+          <!-- Left Main Pane: Map & Chart -->
+          <div class="col-span-8" style="display:flex; flex-direction:column; gap:24px;">
+            <!-- India/District Heatmap & Emergency Navigation Section -->
+            <div class="glass-card glow-card" style="position: relative;">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px; flex-wrap: wrap; gap: 12px;">
+                <div>
+                  <h3 style="font-size:1.2rem;" id="command-map-title">District Spatiotemporal Epidemiology Twin</h3>
+                  <p style="font-size:0.8rem; color:var(--text-secondary);" id="command-map-desc">Highlighting high-risk waterborne infection hubs across Dhar/Indore sectors</p>
+                </div>
+                <!-- Navigation Tabs -->
+                <div style="display:flex; gap:4px; background:rgba(255,255,255,0.03); padding:4px; border-radius:8px; border:1px solid var(--border-color);" id="dashboard-map-tabs">
+                  <button class="tab-btn active" id="tab-btn-epidemiology" style="padding:6px 12px; font-size:0.75rem; font-weight:600; border-radius:6px; cursor:pointer; background:rgba(0, 240, 255, 0.1); border:none; color:var(--color-cyan); transition:all 0.2s;">Epidemiology Heatmap</button>
+                  <button class="tab-btn" id="tab-btn-emergency" style="padding:6px 12px; font-size:0.75rem; font-weight:600; border-radius:6px; cursor:pointer; background:transparent; border:none; color:var(--text-secondary); transition:all 0.2s;">⚡ Live Emergency Navigator</button>
+                </div>
+              </div>
+              
+              <!-- Tab 1 Container (Epidemiology Map) -->
+              <div id="container-tab-epidemiology" class="map-vis-container" style="display: flex;">
+                <!-- SVG map vector representing Indian districts -->
+                <svg class="map-svg" viewBox="0 0 600 350">
+                  <g>
+                    <!-- Dhar District -->
+                    <path d="M 150,120 L 250,90 L 320,130 L 280,220 L 180,240 L 110,180 Z" class="map-district high-risk" name="Dhar District sector A" />
+                    <!-- Kukshi PHC -->
+                    <path d="M 250,90 L 350,70 L 400,120 L 320,130 Z" class="map-district" name="Kukshi CHC Sector B" />
+                    <!-- Badnawar sector -->
+                    <path d="M 320,130 L 400,120 L 460,180 L 410,230 L 280,220 Z" class="map-district" name="Badnawar PHC Sector C" />
+                    <!-- Sardarpur sector -->
+                    <path d="M 110,180 L 180,240 L 160,310 L 80,280 Z" class="map-district" name="Sardarpur Sector D" />
+                    <!-- Manawar sector -->
+                    <path d="M 180,240 L 280,220 L 310,310 L 220,330 Z" class="map-district high-risk" name="Manawar CHC Sector E" />
+                  </g>
+                  <circle cx="210" cy="160" r="6" fill="#ef4444" filter="drop-shadow(0 0 8px #ef4444)" />
+                  <text x="180" y="150" fill="#ffffff" font-size="10" font-weight="600">Cholera Spike Zone</text>
+                  
+                  <circle cx="280" cy="250" r="5" fill="#eab308" filter="drop-shadow(0 0 8px #eab308)" />
+                  <text x="290" y="255" fill="#ffffff" font-size="10" font-weight="600">Dengue Cluster</text>
+                </svg>
+              </div>
+              
+              <!-- Tab 2 Container (Live Emergency Google Maps) -->
+              <div id="container-tab-emergency" class="map-vis-container" style="display: none; height: 500px; flex-direction: row; position: relative;">
+                <!-- Left Control Panel Overlay -->
+                <div id="emergency-control-overlay" style="position: absolute; top: 12px; left: 12px; bottom: 12px; width: 280px; background: rgba(7, 10, 19, 0.85); border: 1px solid var(--border-color); border-radius: 10px; z-index: 10; backdrop-filter: blur(12px); padding: 14px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                  <div style="font-weight: 700; font-size: 0.85rem; color: var(--color-cyan); letter-spacing: 0.05em; text-transform: uppercase;">EMERGENCY RESOURCES</div>
+                  
+                  <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <label style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600;">SELECT CENTER</label>
+                    <select id="emergency-hospital-select" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px; color: var(--text-primary); font-size: 0.8rem; outline: none; cursor: pointer; font-family: var(--font-sans);">
+                      <option value="dhar">Dhar District Hospital (HQ)</option>
+                      <option value="kukshi">Kukshi CHC (Sector B)</option>
+                      <option value="badnawar">Badnawar Civil Hospital (Sector C)</option>
+                      <option value="manawar">Manawar CHC (Sector E) [LOW VENTILATORS!]</option>
+                      <option value="indore">Indore Super Specialty Hub</option>
+                    </select>
+                  </div>
+
+                  <!-- Realtime Ventilator Details -->
+                  <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 6px;" id="emergency-ventilator-details">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <span style="font-size: 0.75rem; color: var(--text-secondary);">Ventilators Available:</span>
+                      <span style="font-size: 0.9rem; font-weight: 700; color: var(--color-cyan);" id="emergency-ventilator-count">12 / 25</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <span style="font-size: 0.75rem; color: var(--text-secondary);">Standby Ambulances:</span>
+                      <span style="font-size: 0.8rem; font-weight: 600; color: var(--color-success);" id="emergency-ambulance-count">3 Standby</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <span style="font-size: 0.75rem; color: var(--text-secondary);">Congestion Status:</span>
+                      <span style="font-size: 0.75rem; font-weight: 600; color: var(--color-warning);" id="emergency-traffic-status">Moderate Traffic</span>
+                    </div>
+                  </div>
+
+                  <!-- Direct & Route actions -->
+                  <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <button class="btn btn-secondary" id="emergency-route-btn" style="width: 100%; font-size: 0.75rem; padding: 8px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                      <span>🛣️</span> Compute Low-Traffic Route
+                    </button>
+                    <button class="btn btn-primary" id="emergency-dispatch-btn" style="width: 100%; font-size: 0.75rem; padding: 8px; display: flex; align-items: center; justify-content: center; gap: 6px; background: linear-gradient(135deg, var(--color-emergency), var(--color-danger)); border-color: rgba(244,63,94,0.3); color: #fff; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2);">
+                      <span>🚨</span> Auto-Call & Dispatch
+                    </button>
+                  </div>
+
+                  <!-- Realtime Ambulance Tracking Timeline -->
+                  <div id="emergency-dispatch-timeline" style="display: none; background: rgba(244, 63, 94, 0.05); border: 1px solid rgba(244, 63, 94, 0.2); border-radius: 6px; padding: 10px; flex-direction: column; gap: 8px;">
+                    <div style="font-size: 0.75rem; font-weight: 700; color: var(--color-emergency); text-transform: uppercase;">ACTIVE DISPATCH TELEMETRY</div>
+                    <div style="display: flex; flex-direction: column; gap: 6px; font-size: 0.75rem; border-left: 2px solid rgba(244, 63, 94, 0.2); padding-left: 10px; margin-left: 4px;" id="dispatch-timeline-steps">
+                      <!-- Steps injected dynamically -->
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Actual Map Slot -->
+                <div id="prahari-google-map-slot" style="flex: 1; width: 100%; height: 100%; border-radius: 12px; overflow: hidden; position: relative; background: #070a13;">
+                  <!-- Map renders here -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Outbreak Prediction Curve -->
+            <div class="glass-card glow-card">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                <div>
+                  <h3 style="font-size:1.2rem;">Temporal Outbreak Projection</h3>
+                  <p style="font-size:0.8rem; color:var(--text-secondary);">Fever clusters timeline predicted 7-14 days in advance via temporal algorithms</p>
+                </div>
+                <span class="badge badge-cyan">MODEL: LSTM DENSE-NET</span>
+              </div>
+              <div class="svg-chart-container" data-chart="outbreak-prediction"></div>
+            </div>
+          </div>
+
+          <!-- Right Sidebar Pane: AI Agents & SOS -->
+          <div class="col-span-4" style="display:flex; flex-direction:column; gap:24px;">
+            <!-- Active AI Agents module -->
+            <div class="glass-card glow-card" style="padding:20px;">
+              <h3 style="font-size:1.15rem; margin-bottom:14px;">Active Prahari AI Agents</h3>
+              <div class="agent-grid">
+                <div class="agent-card" data-agent="prediction">
+                  <div class="agent-header">
+                    <span class="agent-name">Prediction Agent</span>
+                    <span class="agent-pulse"></span>
+                  </div>
+                  <span class="agent-stat">Risk: dengue, cholera</span>
+                  <span class="agent-stat" style="color:var(--color-cyan); font-weight:600;">91.4% Conf.</span>
+                </div>
+                <div class="agent-card" data-agent="verification">
+                  <div class="agent-header">
+                    <span class="agent-name">OCR Auditor</span>
+                    <span class="agent-pulse"></span>
+                  </div>
+                  <span class="agent-stat">Drug inventory sheets</span>
+                  <span class="agent-stat" style="color:var(--color-cyan); font-weight:600;">98.2% Conf.</span>
+                </div>
+                <div class="agent-card" data-agent="optimization">
+                  <div class="agent-header">
+                    <span class="agent-name">Resource Router</span>
+                    <span class="agent-pulse"></span>
+                  </div>
+                  <span class="agent-stat">Active assets transfer</span>
+                  <span class="agent-stat" style="color:var(--color-cyan); font-weight:600;">94.1% Conf.</span>
+                </div>
+                <div class="agent-card" data-agent="emergency">
+                  <div class="agent-header">
+                    <span class="agent-name">Trauma Dispatch</span>
+                    <span class="agent-pulse"></span>
+                  </div>
+                  <span class="agent-stat">Trauma ambulance SOS</span>
+                  <span class="agent-stat" style="color:var(--color-cyan); font-weight:600;">99.5% Conf.</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Selected District telemetry -->
+            <div class="glass-card glow-card" id="twin-district-card">
+              <h3 id="twin-district-title" style="font-size:1.1rem; margin-bottom:12px;">Dhar District Sector A - Digital Twin</h3>
+              <div id="twin-district-info" style="font-size:0.85rem; color:var(--text-secondary);">
+                Select any region or hotspot on the spatiotemporal map to synchronize digital twin models and route critical vaccines or fluid reserves.
+              </div>
+            </div>
+
+            <!-- OCR Scanner file uploader tool -->
+            <div class="glass-card glow-card">
+              <h3 style="font-size:1.1rem; margin-bottom:8px;">Prescription OCR Validator</h3>
+              <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:12px;">Audit prescription credentials and dispense counts against DHC stock records.</p>
+              
+              <div style="border: 2px dashed rgba(0, 240, 255, 0.25); border-radius: 10px; padding: 20px; text-align: center; cursor: pointer; transition: background 0.2s;" ondragover="event.preventDefault();" onclick="document.getElementById('presc-ocr-upload').click();">
+                <span style="font-size:1.8rem; display:block; margin-bottom:6px;">📄</span>
+                <span style="font-size:0.8rem; color:var(--text-secondary);">Drag prescription or click to scan</span>
+                <input type="file" id="presc-ocr-upload" style="display:none;" accept="image/*,application/pdf">
+              </div>
+
+              <!-- OCR analysis results placeholder -->
+              <div id="ocr-analysis-log" style="margin-top:14px;"></div>
+            </div>
+
+            <!-- Microphone Voice Transcriber slot -->
+            <div class="glass-card glow-card" style="text-align:center;">
+              <h3 style="font-size:1.1rem; margin-bottom:6px;">Voice-to-Dashboard Notes</h3>
+              <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:12px;">Dictate emergency caseload notices directly to district operators.</p>
+              
+              <button class="btn btn-secondary" id="voice-input-trigger" style="width:100%; justify-content:center;">
+                <span>🎤</span> Speak Clinical Notes
+              </button>
+
+              <!-- Height-growing animation lines -->
+              <div id="voice-waveform-container" style="display:none; justify-content:center; align-items:center; height:36px; margin-top:12px;">
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Global emergency SOS event trigger banners -->
+        <div class="sos-banner float-animation">
+          <div style="display:flex; align-items:center; gap:16px;">
+            <div style="font-size:2rem;">🚨</div>
+            <div>
+              <h4 style="font-size:1.1rem; color:var(--color-danger); font-family:var(--font-display);">EMERGENCY AMBULANCE SOS DISPATCH</h4>
+              <p style="font-size:0.8rem; color:var(--text-secondary);">Road trauma incident on NH-47 sector D. Coordinates synced with nearest trauma unit.</p>
+            </div>
+          </div>
+          <button class="btn btn-accent" style="border-color:var(--color-danger); color:var(--color-danger); background:rgba(239, 68, 68, 0.1);" onclick="window.PrahariNotifications.show('SOS Triaged', 'Trauma ambulance ETA: 8 minutes. Nearest PHC alerted.', 'danger')">
+            Open Trauma Map
+          </button>
+        </div>
+      </main>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="/theme.js"></script>
+    <script type="module" src="/notifications.js"></script>
+    <script type="module" src="/search.js"></script>
+    <script type="module" src="/auth.js"></script>
+    <script type="module" src="/dashboard.js"></script>
+    <script type="module" src="/script.js"></script>
+  </body>
+</html>

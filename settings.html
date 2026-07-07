@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OS Configuration - Prahari OS</title>
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/dashboard.css" />
+    <link rel="stylesheet" href="/animations.css" />
+  </head>
+  <body>
+    <!-- Background glows -->
+    <div class="glow-orb-1"></div>
+    <div class="glow-orb-2"></div>
+
+    <!-- Navigation Header -->
+    <nav class="main-nav">
+      <div class="nav-brand">
+        <div class="brand-logo-container" style="cursor: pointer;" onclick="window.location.href='index.html'">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </div>
+        <span class="brand-name">PRAHARI</span>
+      </div>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
+        <a href="citizen.html" class="nav-link">Citizen platform</a>
+        <a href="admin.html" class="nav-link">Governance</a>
+        <a href="settings.html" class="nav-link active">Settings</a>
+      </div>
+      <div class="nav-controls">
+        <button class="btn btn-secondary" onclick="PrahariSearch.open()" style="padding: 6px 12px; font-size:0.85rem; display:flex; align-items:center; gap:8px;">
+          <span>🔍</span> Search <span class="shortcut-badge">Ctrl+K</span>
+        </button>
+        <div id="nav-user-avatar-block">
+          <!-- Populated by script.js -->
+        </div>
+      </div>
+    </nav>
+
+    <div class="dashboard-container">
+      <!-- Sidebar Panel -->
+      <aside class="dashboard-sidebar">
+        <div class="sidebar-section">
+          <span class="sidebar-title">SYSTEM PREFERENCES</span>
+          <ul class="sidebar-menu">
+            <li><a href="settings.html" class="sidebar-item-link active">⚙️ OS Configuration</a></li>
+            <li><a href="profile.html" class="sidebar-item-link">🆔 Identity Hub</a></li>
+          </ul>
+        </div>
+      </aside>
+
+      <!-- Main Board Content -->
+      <main class="dashboard-main">
+        <!-- Dashboard header -->
+        <div class="dashboard-header-block">
+          <div class="dashboard-title-area">
+            <h1 style="font-size:2rem; letter-spacing:-0.03em;">OS Configuration & Preferences</h1>
+            <p class="dashboard-subtitle">Adjust styling presets, configure OAuth tokens, and toggling contrast accessibility parameters</p>
+          </div>
+          <span class="badge badge-cyan">SYSTEM SETTINGS</span>
+        </div>
+
+        <div class="bento-grid">
+          <!-- Left Main Pane: Presets and Configuration selectors -->
+          <div class="col-span-8" style="display:flex; flex-direction:column; gap:24px;">
+            <!-- Theme, scale, and accessibility triggers -->
+            <div class="glass-card glow-card">
+              <h3 style="font-size:1.35rem; margin-bottom:16px;">Visual Aesthetics & Accessibility</h3>
+              
+              <!-- Dark / Light theme selector -->
+              <div class="form-group" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:16px;">
+                <div>
+                  <span style="font-weight:600; font-size:0.95rem; display:block;">Ambient Theme Mode</span>
+                  <span style="font-size:0.8rem; color:var(--text-secondary);">Toggle between high-contrast dark space slate and light mode</span>
+                </div>
+                <button class="btn btn-secondary" id="theme-toggle-settings-btn">Toggle Theme Mode</button>
+              </div>
+
+              <!-- Accessible text-size scaler -->
+              <div class="form-group" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:16px; margin-top:16px;">
+                <div>
+                  <span style="font-weight:600; font-size:0.95rem; display:block;">Accessibility Font Scaler</span>
+                  <span style="font-size:0.8rem; color:var(--text-secondary);">Resize baseline system-wide texts to support visual impairments</span>
+                </div>
+                <select class="form-select" id="font-scaler-dropdown" style="width:160px;">
+                  <option value="90%">90% (Compact)</option>
+                  <option value="100%" selected>100% (Standard)</option>
+                  <option value="110%">110% (Medium)</option>
+                  <option value="120%">120% (Enlarged)</option>
+                </select>
+              </div>
+
+              <!-- Toast sound configurations -->
+              <div class="form-group" style="display:flex; justify-content:space-between; align-items:center; margin-top:16px;">
+                <div>
+                  <span style="font-weight:600; font-size:0.95rem; display:block;">System Notification Audio</span>
+                  <span style="font-size:0.8rem; color:var(--text-secondary);">Trigger sound-synthesizer chimes during emergency dispatch updates</span>
+                </div>
+                <label class="remember-me" style="font-size:1rem; gap:12px;">
+                  <input type="checkbox" id="notification-chime-checkbox" style="width:18px; height:18px;">
+                  <span>Enable audio</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Connected workspace integrations and authorization scopes -->
+            <div class="glass-card glow-card">
+              <h3 style="font-size:1.35rem; margin-bottom:12px;">Google Workspace Connected APIs</h3>
+              <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:20px;">Review Google account sync authorization scopes. Syncs emergency clinical rosters directly with linked Google Drive and contacts directories.</p>
+              
+              <div style="display:flex; flex-direction:column; gap:14px;">
+                <div style="background:rgba(255,255,255,0.01); border:1px solid var(--border-color); border-radius:10px; padding:16px; display:flex; justify-content:space-between; align-items:center;">
+                  <div>
+                    <h5 style="font-size:0.95rem; font-weight:600;">People API (Contacts Sync)</h5>
+                    <span style="font-size:0.75rem; color:var(--text-muted); font-family:var(--font-mono);">Scope: contacts.readonly • Syncs ICE networks</span>
+                  </div>
+                  <span class="badge badge-success">✓ CONNECTED</span>
+                </div>
+
+                <div style="background:rgba(255,255,255,0.01); border:1px solid var(--border-color); border-radius:10px; padding:16px; display:flex; justify-content:space-between; align-items:center;">
+                  <div>
+                    <h5 style="font-size:0.95rem; font-weight:600;">Google Profile Identity</h5>
+                    <span style="font-size:0.75rem; color:var(--text-muted); font-family:var(--font-mono);">Scope: userinfo.profile, email • Auth links</span>
+                  </div>
+                  <span class="badge badge-success">✓ CONNECTED</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Security compliance and baseline resets -->
+          <div class="col-span-4" style="display:flex; flex-direction:column; gap:24px;">
+            <!-- Security compliance specifications -->
+            <div class="glass-card glow-card">
+              <h3 style="font-size:1.15rem; margin-bottom:12px;">Regulatory Compliancy</h3>
+              <div style="display:flex; flex-direction:column; gap:10px; font-size:0.85rem;">
+                <div style="display:flex; justify-content:space-between;">
+                  <span>FHIR Core Version:</span>
+                  <span style="color:var(--text-secondary); font-family:var(--font-mono);">R4 v4.0.1</span>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                  <span>Auth Encryption:</span>
+                  <span style="color:var(--color-success); font-weight:700;">AES-256 GCM</span>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                  <span>Database Hub ID:</span>
+                  <span style="color:var(--text-secondary); font-family:var(--font-mono);">active-zepplin</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Global system variables master reset triggers -->
+            <div class="glass-card glow-card" style="border-left: 4px solid var(--color-danger);">
+              <h3 style="font-size:1.15rem; margin-bottom:10px; color:var(--color-danger);">Master System Reset</h3>
+              <p style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:14px;">Clears all local operator caches, active theme variables, and resets baseline scale to standard.</p>
+              
+              <button class="btn btn-accent" style="width:100%; border-color:var(--color-danger); color:var(--color-danger); background:rgba(239,68,68,0.1);" id="master-reset-config-btn">Reset system settings</button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="/theme.js"></script>
+    <script type="module" src="/notifications.js"></script>
+    <script type="module" src="/search.js"></script>
+    <script type="module" src="/auth.js"></script>
+
+    <!-- Settings page control controllers -->
+    <script type="module">
+      // Toggle theme trigger
+      const themeBtn = document.getElementById('theme-toggle-settings-btn');
+      themeBtn.addEventListener('click', () => {
+        const nextTheme = window.PrahariTheme.toggleTheme();
+        window.PrahariNotifications.show("Visual Style Modified", `Active theme changed to ${nextTheme.toUpperCase()} mode`, "cyan");
+      });
+
+      // Accessible scale drop-down selector
+      const scaleDropdown = document.getElementById('font-scaler-dropdown');
+      
+      // Load current cached scale
+      const currentScale = window.PrahariTheme.getFontScale();
+      scaleDropdown.value = currentScale;
+
+      scaleDropdown.addEventListener('change', (e) => {
+        const scaleVal = e.target.value;
+        window.PrahariTheme.setFontScale(scaleVal);
+        window.PrahariNotifications.show("Accessible Scaler set", `Baselines text resized to ${scaleVal}`, "success");
+      });
+
+      // Sound notifications setup checkbox
+      const audioCheckbox = document.getElementById('notification-chime-checkbox');
+      audioCheckbox.addEventListener('change', (e) => {
+        const isChecked = e.target.checked;
+        window.PrahariNotifications.toggleAudio(isChecked);
+        
+        if (isChecked) {
+          window.PrahariNotifications.show("Audio Chimes Engaged", "Prahari OS will chime for critical alerts", "success");
+          window.PrahariNotifications.playChime();
+        } else {
+          window.PrahariNotifications.show("Audio Mutted", "Alarm sound indicators disengaged", "cyan");
+        }
+      });
+
+      // Master reset button
+      document.getElementById('master-reset-config-btn').addEventListener('click', () => {
+        window.PrahariTheme.resetThemeSettings();
+        audioCheckbox.checked = false;
+        window.PrahariNotifications.toggleAudio(false);
+        scaleDropdown.value = "100%";
+        
+        window.PrahariNotifications.show("Settings Cleared", "Operator preference vectors restored to default baseline dark", "warning");
+      });
+    </script>
+    <script type="module" src="/script.js"></script>
+  </body>
+</html>

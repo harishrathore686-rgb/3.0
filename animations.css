@@ -1,0 +1,238 @@
+/* 
+ * PRAHARI OS - animations.css
+ * Crafted with Apple, Vercel, and Linear standards of motion design.
+ */
+
+/* AI Boot Loading Screen */
+@keyframes fade-out {
+  0% { opacity: 1; visibility: visible; }
+  100% { opacity: 0; visibility: hidden; }
+}
+
+@keyframes brain-pulse {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 15px rgba(0, 102, 204, 0.4)) drop-shadow(0 0 30px rgba(0, 240, 255, 0.2));
+  }
+  50% {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 30px rgba(0, 102, 204, 0.7)) drop-shadow(0 0 60px rgba(0, 240, 255, 0.5));
+  }
+}
+
+/* AI Pulse Core */
+.ai-pulse-core {
+  animation: brain-pulse 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Health Scanner Line */
+@keyframes scan {
+  0% { top: 0%; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+.scanner-line {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #00f0ff, transparent);
+  box-shadow: 0 0 10px #00f0ff, 0 0 20px rgba(0, 240, 255, 0.5);
+  animation: scan 3s ease-in-out infinite;
+}
+
+/* Voice Waveform Height Oscillation */
+@keyframes wave-grow {
+  0%, 100% { height: 10%; }
+  50% { height: 100%; }
+}
+
+.wave-bar {
+  display: inline-block;
+  width: 4px;
+  height: 50%;
+  background: linear-gradient(180deg, #00f0ff, #0066cc);
+  border-radius: 4px;
+  margin: 0 2px;
+  animation: wave-grow 1.2s ease-in-out infinite;
+}
+
+.wave-bar:nth-child(2) { animation-delay: 0.15s; }
+.wave-bar:nth-child(3) { animation-delay: 0.3s; }
+.wave-bar:nth-child(4) { animation-delay: 0.45s; }
+.wave-bar:nth-child(5) { animation-delay: 0.05s; }
+.wave-bar:nth-child(6) { animation-delay: 0.2s; }
+.wave-bar:nth-child(7) { animation-delay: 0.35s; }
+.wave-bar:nth-child(8) { animation-delay: 0.5s; }
+
+/* Typing cursor animation */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.typing-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1.1em;
+  background-color: #00f0ff;
+  margin-left: 2px;
+  animation: blink 0.8s infinite;
+}
+
+/* Rotating Glow Ambient Background */
+@keyframes rotate-glow {
+  0% { transform: rotate(0deg) translate(-50%, -50%); }
+  100% { transform: rotate(360deg) translate(-50%, -50%); }
+}
+
+.glow-orb-1 {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 102, 204, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+  top: 10%;
+  left: 20%;
+  mix-blend-mode: screen;
+  filter: blur(80px);
+  pointer-events: none;
+  animation: rotate-glow 25s linear infinite;
+  transform-origin: 40% 40%;
+}
+
+.glow-orb-2 {
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 240, 255, 0.12) 0%, rgba(0, 0, 0, 0) 70%);
+  bottom: 10%;
+  right: 15%;
+  mix-blend-mode: screen;
+  filter: blur(80px);
+  pointer-events: none;
+  animation: rotate-glow 20s linear infinite reverse;
+  transform-origin: 60% 60%;
+}
+
+/* Mouse cursor hover magnetic/glow tracking */
+.glow-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.glow-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(250px circle at var(--mouse-x, 0) var(--mouse-y, 0), rgba(0, 240, 255, 0.06), transparent 80%);
+  z-index: 1;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+  opacity: 0;
+}
+
+.glow-card:hover::before {
+  opacity: 1;
+}
+
+/* Medicine Flow Animation */
+@keyframes flow-dash {
+  to {
+    stroke-dashoffset: -40;
+  }
+}
+
+.animated-flow-line {
+  stroke-dasharray: 8 4;
+  animation: flow-dash 1.5s linear infinite;
+}
+
+/* Skeleton Loading Animation */
+@keyframes skeleton-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #161d2d 25%, #232c3f 50%, #161d2d 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite linear;
+  border-radius: 4px;
+}
+
+/* Notification pop */
+@keyframes toast-slide-in {
+  0% { transform: translateY(50px) scale(0.9); opacity: 0; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+@keyframes toast-slide-out {
+  0% { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(-30px) scale(0.9); opacity: 0; }
+}
+
+.toast-enter {
+  animation: toast-slide-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.toast-exit {
+  animation: toast-slide-out 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* General Scale Hover Effects */
+.hover-scale {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.hover-scale:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), 0 0 15px rgba(0, 240, 255, 0.15);
+}
+
+/* Floating Animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+.float-animation {
+  animation: float 4s ease-in-out infinite;
+}
+
+/* Ripples */
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(0, 240, 255, 0.35);
+  transform: scale(0);
+  animation: ripple-effect 0.6s ease-out;
+  pointer-events: none;
+}
+
+@keyframes ripple-effect {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* AI Thinking loader */
+@keyframes thinking-dots {
+  0%, 20% { content: "."; }
+  40% { content: ".."; }
+  60%, 100% { content: "..."; }
+}
+
+.thinking::after {
+  content: ".";
+  display: inline-block;
+  animation: thinking-dots 1.5s infinite;
+  width: 12px;
+  text-align: left;
+}

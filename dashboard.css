@@ -1,0 +1,349 @@
+/*
+ * PRAHARI OS - dashboard.css
+ * Dashboard specific layouts, grid bento boards, charts, and interactive widgets.
+ */
+
+.dashboard-container {
+  display: flex;
+  min-height: calc(100vh - 73px);
+  background-color: var(--bg-primary);
+}
+
+/* Sidebar Styling */
+.dashboard-sidebar {
+  width: 260px;
+  background: rgba(10, 16, 32, 0.4);
+  border-right: 1px solid var(--border-color);
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  backdrop-filter: blur(10px);
+}
+
+.sidebar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sidebar-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+  padding-left: 12px;
+}
+
+.sidebar-menu {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sidebar-item-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.sidebar-item-link:hover, .sidebar-item-link.active {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
+  border-left: 3px solid var(--color-cyan);
+  padding-left: 11px;
+}
+
+/* Main Board Content */
+.dashboard-main {
+  flex: 1;
+  padding: 32px 40px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* Header summary stats */
+.dashboard-header-block {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dashboard-title-area {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dashboard-subtitle {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+/* Bento Grid */
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.col-span-12 { grid-column: span 12 / span 12; }
+.col-span-8 { grid-column: span 8 / span 8; }
+.col-span-4 { grid-column: span 4 / span 4; }
+.col-span-6 { grid-column: span 6 / span 6; }
+.col-span-3 { grid-column: span 3 / span 3; }
+
+/* Interactive Map Visualization Container */
+.map-vis-container {
+  height: 380px;
+  background: rgba(13, 20, 35, 0.3);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.map-svg {
+  width: 100%;
+  height: 100%;
+  max-height: 350px;
+}
+
+.map-district {
+  fill: rgba(0, 102, 204, 0.15);
+  stroke: rgba(255, 255, 255, 0.15);
+  stroke-width: 1;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.map-district:hover {
+  fill: rgba(0, 240, 255, 0.35);
+  stroke: var(--color-cyan);
+  filter: drop-shadow(0 0 8px var(--color-cyan));
+}
+
+.map-district.high-risk {
+  fill: rgba(239, 68, 68, 0.25);
+  stroke: var(--color-danger);
+}
+
+.map-district.high-risk:hover {
+  fill: rgba(239, 68, 68, 0.5);
+}
+
+/* Mini Activity Stream */
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.activity-item {
+  display: flex;
+  gap: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  padding-bottom: 12px;
+}
+
+.activity-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.activity-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-cyan);
+  margin-top: 6px;
+  box-shadow: 0 0 8px var(--color-cyan);
+}
+
+.activity-dot.red { background: var(--color-danger); box-shadow: 0 0 8px var(--color-danger); }
+.activity-dot.green { background: var(--color-success); box-shadow: 0 0 8px var(--color-success); }
+
+.activity-text {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.activity-time {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  display: block;
+}
+
+/* Prediction Timeline component */
+.timeline-list {
+  position: relative;
+  border-left: 2px solid rgba(255, 255, 255, 0.08);
+  margin-left: 8px;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.timeline-marker {
+  position: absolute;
+  left: -7px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--bg-primary);
+  border: 2px solid var(--color-cyan);
+  box-shadow: 0 0 6px var(--color-cyan);
+}
+
+.timeline-node {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.timeline-date {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-cyan);
+  font-weight: 500;
+}
+
+.timeline-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.timeline-desc {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+/* AI Agents list */
+.agent-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.agent-card {
+  background: rgba(13, 20, 35, 0.35);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: all 0.2s;
+}
+
+.agent-card:hover {
+  border-color: rgba(0, 240, 255, 0.2);
+  background: rgba(13, 20, 35, 0.55);
+}
+
+.agent-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.agent-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.agent-pulse {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-success);
+  box-shadow: 0 0 8px var(--color-success);
+}
+
+.agent-pulse.thinking {
+  background: var(--color-cyan);
+  box-shadow: 0 0 8px var(--color-cyan);
+  animation: pulse-thinking 1.5s infinite;
+}
+
+@keyframes pulse-thinking {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+.agent-stat {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+/* Stock flow visual animation container */
+.stock-flow-container {
+  height: 120px;
+  position: relative;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  margin-top: 12px;
+  overflow: hidden;
+}
+
+/* Emergency response card controls */
+.sos-banner {
+  background: linear-gradient(135deg, rgba(244, 63, 94, 0.15) 0%, rgba(239, 68, 68, 0.05) 100%);
+  border: 1px solid rgba(244, 63, 94, 0.3);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Custom interactive graphs based on SVGs */
+.svg-chart-container {
+  position: relative;
+  width: 100%;
+  height: 200px;
+}
+
+.svg-chart-line {
+  fill: none;
+  stroke: url(#cyan-blue-grad);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.svg-chart-fill {
+  fill: url(#cyan-blue-area);
+  opacity: 0.15;
+}
+
+.chart-grid-line {
+  stroke: rgba(255, 255, 255, 0.05);
+  stroke-width: 1;
+}
+
+/* Compact layout responsiveness */
+@media (max-width: 1200px) {
+  .col-span-8, .col-span-4 { grid-column: span 12 / span 12; }
+}
+
+@media (max-width: 768px) {
+  .dashboard-container { flex-direction: column; }
+  .dashboard-sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--border-color); }
+  .dashboard-main { padding: 20px; }
+}

@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Operator Profile - Prahari OS</title>
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/dashboard.css" />
+    <link rel="stylesheet" href="/animations.css" />
+  </head>
+  <body>
+    <!-- Background glows -->
+    <div class="glow-orb-1"></div>
+    <div class="glow-orb-2"></div>
+
+    <!-- Navigation Header -->
+    <nav class="main-nav">
+      <div class="nav-brand">
+        <div class="brand-logo-container" style="cursor: pointer;" onclick="window.location.href='index.html'">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </div>
+        <span class="brand-name">PRAHARI</span>
+      </div>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
+        <a href="citizen.html" class="nav-link">Citizen platform</a>
+        <a href="admin.html" class="nav-link">Governance</a>
+        <a href="settings.html" class="nav-link">Settings</a>
+      </div>
+      <div class="nav-controls">
+        <button class="btn btn-secondary" onclick="PrahariSearch.open()" style="padding: 6px 12px; font-size:0.85rem; display:flex; align-items:center; gap:8px;">
+          <span>🔍</span> Search <span class="shortcut-badge">Ctrl+K</span>
+        </button>
+        <div id="nav-user-avatar-block">
+          <!-- Populated by script.js -->
+        </div>
+      </div>
+    </nav>
+
+    <div class="dashboard-container">
+      <!-- Sidebar Panel -->
+      <aside class="dashboard-sidebar">
+        <div class="sidebar-section">
+          <span class="sidebar-title">OPERATOR PREFERENCES</span>
+          <ul class="sidebar-menu">
+            <li><a href="profile.html" class="sidebar-item-link active">🆔 Identity Hub</a></li>
+            <li><a href="settings.html" class="sidebar-item-link">⚙️ OS Configuration</a></li>
+          </ul>
+        </div>
+      </aside>
+
+      <!-- Main Board Content -->
+      <main class="dashboard-main">
+        <!-- Dashboard header -->
+        <div class="dashboard-header-block">
+          <div class="dashboard-title-area">
+            <h1 style="font-size:2rem; letter-spacing:-0.03em;">Operator Identity Hub</h1>
+            <p class="dashboard-subtitle">Manage public health credentials, Google Workspace profiles, and ICE networks</p>
+          </div>
+          <button class="btn btn-secondary" id="logout-settings-trigger" style="border-color:var(--color-danger); color:var(--color-danger);">Sign Out Session</button>
+        </div>
+
+        <div class="bento-grid">
+          <!-- Left Main Column: User detail card and connected ICE contacts -->
+          <div class="col-span-8" style="display:flex; flex-direction:column; gap:24px;">
+            <!-- Profile Identity Card -->
+            <div class="glass-card glow-card" style="display:flex; gap:24px; align-items:center;">
+              <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80" style="width:100px; height:100px; border-radius:50%; border:2px solid var(--color-cyan); object-fit:cover;" id="profile-avatar-display" referrerPolicy="no-referrer">
+              
+              <div style="flex:1;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                  <div>
+                    <h2 style="font-size:1.6rem;" id="profile-name-display">Dr. Sandeep Reddy</h2>
+                    <span class="badge badge-cyan" style="margin-top:4px;" id="profile-role-display">DOCTOR</span>
+                  </div>
+                  <span class="badge badge-success" id="profile-sync-status-badge">GOOGLE SYNCED</span>
+                </div>
+                
+                <div style="margin-top:16px; display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:0.85rem; color:var(--text-secondary);">
+                  <div>
+                    <span style="color:var(--text-muted); display:block; font-size:0.75rem;">OFFICIAL EMAIL</span>
+                    <strong style="color:var(--text-primary);" id="profile-email-display">sandeep.reddy@gov.in</strong>
+                  </div>
+                  <div>
+                    <span style="color:var(--text-muted); display:block; font-size:0.75rem;">REGIONAL NODE</span>
+                    <strong style="color:var(--text-primary);" id="profile-district-display">Indore, Madhya Pradesh</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- In Case of Emergency (ICE) contacts Google integration sync -->
+            <div class="glass-card glow-card">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                <div>
+                  <h3 style="font-size:1.35rem;">ICE Emergency Network (Google Contacts)</h3>
+                  <p style="font-size:0.8rem; color:var(--text-secondary);">Sync emergency contacts from Google Workspace to dispatch critical outbreak notices instantly.</p>
+                </div>
+                <button class="btn btn-primary" style="font-size:0.8rem; padding:6px 14px;" id="sync-google-contacts-btn">Sync Contacts</button>
+              </div>
+
+              <!-- List of emergency contacts -->
+              <div style="display:flex; flex-direction:column; gap:12px;" id="emergency-contacts-table-list">
+                <div style="padding:20px; text-align:center; color:var(--text-muted); border:1px dashed var(--border-color); border-radius:8px; font-size:0.85rem;">
+                  Emergency ICE contacts roster empty. Connect and synchronize contacts from your Google account.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Security registries indicators -->
+          <div class="col-span-4" style="display:flex; flex-direction:column; gap:24px;">
+            <!-- Secure credential metadata -->
+            <div class="glass-card glow-card">
+              <h3 style="font-size:1.15rem; margin-bottom:12px;">Credential Metadata</h3>
+              <div style="display:flex; flex-direction:column; gap:12px; font-size:0.85rem; color:var(--text-secondary);">
+                <div>
+                  <span style="color:var(--text-muted); display:block; font-size:0.75rem;">ABHA DIGITAL ID</span>
+                  <strong style="color:var(--text-primary); font-family:var(--font-mono);" id="profile-card-id-display">PR-882711</strong>
+                </div>
+                <div>
+                  <span style="color:var(--text-muted); display:block; font-size:0.75rem;">VERIFIED AGE / BLOOD GROUP</span>
+                  <strong style="color:var(--text-primary);"><span id="profile-age-display">38</span> yrs • <span id="profile-blood-display">B+</span></strong>
+                </div>
+                <div>
+                  <span style="color:var(--text-muted); display:block; font-size:0.75rem;">REGISTRY CREATION DATE</span>
+                  <strong style="color:var(--text-primary); font-family:var(--font-mono);">06-JUL-2026</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="/theme.js"></script>
+    <script type="module" src="/notifications.js"></script>
+    <script type="module" src="/search.js"></script>
+    <script type="module" src="/auth.js"></script>
+
+    <!-- Profile page events controllers -->
+    <script type="module">
+      import { auth, db } from "/auth.js";
+
+      class ProfileController {
+        constructor() {
+          this.init();
+        }
+
+        init() {
+          window.addEventListener('prahari-auth-login', () => this.syncProfileToUI());
+          window.addEventListener('prahari-auth-roleChanged', () => this.syncProfileToUI());
+          this.syncProfileToUI();
+          
+          // Bind sync trigger
+          document.getElementById('sync-google-contacts-btn').addEventListener('click', () => this.syncContacts());
+          document.getElementById('logout-settings-trigger').addEventListener('click', () => this.handleLogout());
+        }
+
+        syncProfileToUI() {
+          const profile = window.PrahariAuth ? window.PrahariAuth.getUserProfile() : null;
+          if (profile) {
+            const nameEl = document.getElementById('profile-name-display');
+            const emailEl = document.getElementById('profile-email-display');
+            const roleEl = document.getElementById('profile-role-display');
+            const distEl = document.getElementById('profile-district-display');
+            const avatarEl = document.getElementById('profile-avatar-display');
+            const idEl = document.getElementById('profile-card-id-display');
+            const ageEl = document.getElementById('profile-age-display');
+            const bloodEl = document.getElementById('profile-blood-display');
+            const badgeEl = document.getElementById('profile-sync-status-badge');
+
+            if (nameEl) nameEl.textContent = profile.displayName || "Dr. Sandeep Reddy";
+            if (emailEl) emailEl.textContent = profile.email || "sandeep.reddy@gov.in";
+            if (roleEl) roleEl.textContent = (profile.role || "Doctor").toUpperCase();
+            if (distEl) distEl.textContent = profile.district || "Indore, Madhya Pradesh";
+            if (avatarEl) avatarEl.src = profile.photoURL || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80";
+            if (idEl) idEl.textContent = profile.digitalCardId || "PR-882711";
+            if (ageEl) ageEl.textContent = profile.age || 38;
+            if (bloodEl) bloodEl.textContent = profile.bloodGroup || "B+";
+            
+            if (badgeEl) {
+              if (profile.googleSynced) {
+                badgeEl.textContent = "GOOGLE SYNCED";
+                badgeEl.className = "badge badge-success";
+              } else {
+                badgeEl.textContent = "OFFLINE STORAGE";
+                badgeEl.className = "badge badge-warning";
+              }
+            }
+          }
+        }
+
+        async syncContacts() {
+          const list = document.getElementById('emergency-contacts-table-list');
+          list.innerHTML = `<div style="text-align:center; padding:20px;" class="thinking">Querying Google Workspace People Directory</div>`;
+          
+          try {
+            const response = await fetch('/api/contacts');
+            const data = await response.json();
+            
+            let html = ``;
+            if (data.contacts && data.contacts.length > 0) {
+              data.contacts.forEach(contact => {
+                html += `
+                  <div style="background:rgba(255,255,255,0.01); border:1px solid var(--border-color); border-radius:10px; padding:12px; display:flex; justify-content:space-between; align-items:center;">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                      <div style="width:36px; height:36px; border-radius:50%; background:${contact.color}; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.85rem;">
+                        ${contact.initials}
+                      </div>
+                      <div>
+                        <h4 style="font-size:0.95rem; font-weight:600;">${contact.name}</h4>
+                        <span style="font-size:0.75rem; color:var(--text-muted);">${contact.role} • ${contact.email}</span>
+                      </div>
+                    </div>
+                    <div style="text-align:right;">
+                      <strong style="display:block; font-size:0.85rem; font-family:var(--font-mono);">${contact.phone}</strong>
+                      ${contact.emergency ? `<span class="badge badge-danger" style="font-size:0.6rem; padding:2px 4px;">ICE EMERGENCY</span>` : ``}
+                    </div>
+                  </div>
+                `;
+              });
+              list.innerHTML = html;
+              window.PrahariNotifications.show("Emergency Contacts Synced", "Successfully parsed 7 workspace emergency contacts", "success");
+            } else {
+              throw new Error("No contact records retrieved.");
+            }
+          } catch (e) {
+            list.innerHTML = `
+              <div style="padding:20px; text-align:center; color:var(--color-danger); border:1px dashed var(--border-color); border-radius:8px;">
+                ⚠ Contacts Synchronizer Fail: ${e.message || "Failed to parse Google Contacts profile."}
+              </div>
+            `;
+          }
+        }
+
+        async handleLogout() {
+          await window.PrahariAuth.logout();
+          window.PrahariNotifications.show("Session terminated", "Operator security keys cleared", "warning");
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 1200);
+        }
+      }
+
+      window.PrahariProfile = new ProfileController();
+    </script>
+    <script type="module" src="/script.js"></script>
+  </body>
+</html>

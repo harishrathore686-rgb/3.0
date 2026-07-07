@@ -1,0 +1,6 @@
+{
+  "name": "Prahari",
+  "description": "The AI Nervous System for District Health Centres - Listen. Verify. Predict. Optimize.",
+  "requestFramePermissions": ["microphone", "geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

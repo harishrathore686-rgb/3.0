@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Provision Credentials - Prahari OS</title>
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/auth.css" />
+    <link rel="stylesheet" href="/animations.css" />
+  </head>
+  <body>
+    <!-- Background glows -->
+    <div class="glow-orb-1"></div>
+    <div class="glow-orb-2"></div>
+
+    <div class="auth-wrapper">
+      <div class="auth-card hover-scale">
+        <div class="auth-header">
+          <div class="brand-logo-container" style="width: 48px; height: 48px; border-radius:10px; cursor: pointer;" onclick="window.location.href='index.html'">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+          </div>
+          <h2 class="auth-title">Provision Operator</h2>
+          <p class="auth-subtitle">Register new profile into public district health node</p>
+        </div>
+
+        <!-- Role selection panel -->
+        <div>
+          <label class="form-label" style="text-align:center; margin-bottom:8px;">Choose Primary Registry Role</label>
+          <div class="role-grid" id="signup-role-grid">
+            <div class="role-card" data-role="Citizen">
+              <div class="role-icon">👤</div>
+              <span class="role-label">Citizen</span>
+            </div>
+            <div class="role-card active" data-role="Doctor">
+              <div class="role-icon">🩺</div>
+              <span class="role-label">Doctor</span>
+            </div>
+            <div class="role-card" data-role="Nurse">
+              <div class="role-icon">🩹</div>
+              <span class="role-label">Nurse</span>
+            </div>
+            <div class="role-card" data-role="Pharmacist">
+              <div class="role-icon">🧪</div>
+              <span class="role-label">Pharmacist</span>
+            </div>
+            <div class="role-card" data-role="District Officer">
+              <div class="role-icon">📡</div>
+              <span class="role-label">Officer</span>
+            </div>
+            <div class="role-card" data-role="Administrator">
+              <div class="role-icon">⚙️</div>
+              <span class="role-label">Admin</span>
+            </div>
+          </div>
+        </div>
+
+        <form id="signup-form">
+          <div class="form-group">
+            <label class="form-label" for="signup-name">Full Name (As in ABHA/Govt ID)</label>
+            <input class="form-input" type="text" id="signup-name" placeholder="Dr. Sandeep Reddy" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="signup-email">Official Email (.gov.in / .org)</label>
+            <input class="form-input" type="email" id="signup-email" placeholder="sandeep.reddy@gov.in" required autocomplete="username">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="signup-password">Secure Password (Min 8 characters)</label>
+            <input class="form-input" type="password" id="signup-password" placeholder="••••••••" required autocomplete="new-password">
+            <!-- Strength meter -->
+            <div class="strength-meter-container">
+              <div class="strength-bar-bg">
+                <div class="strength-bar-fill" id="strength-fill"></div>
+              </div>
+              <span class="strength-text" id="strength-label">Password strength: Empty</span>
+            </div>
+          </div>
+
+          <button class="btn btn-primary" type="submit" style="width:100%; margin-top:20px; padding:12px;" id="signup-submit-btn">
+            Compile Profile Key
+          </button>
+        </form>
+
+        <p class="auth-toggle-text">
+          Existing health operative? <a href="login.html" class="auth-toggle-link">Open login gateway</a>
+        </p>
+      </div>
+
+      <!-- Success Screen -->
+      <div class="auth-card" id="success-panel" style="display:none; position:absolute; z-index:30;">
+        <div class="success-display" style="display:flex;">
+          <div class="success-icon-container">
+            ✓
+          </div>
+          <h2 class="auth-title" style="color:var(--color-success);">Profile Created</h2>
+          <p class="auth-subtitle" id="provisioned-msg">Profile successfully written to Firestore node.</p>
+          <div style="font-family:var(--font-mono); font-size:0.75rem; color:var(--text-muted); background:rgba(255,255,255,0.02); padding:10px 20px; border-radius:6px;">
+            Secure profile provisioned • Routing telemetry
+          </div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <p style="font-size:0.8rem; color:var(--text-secondary);" class="thinking">Entering command system</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="/theme.js"></script>
+    <script type="module" src="/notifications.js"></script>
+    <script type="module" src="/search.js"></script>
+    <script type="module" src="/auth.js"></script>
+
+    <!-- Signup Event Controllers -->
+    <script type="module">
+      import { auth, db } from "/auth.js";
+
+      // Select profile role focus
+      const roles = document.querySelectorAll('.role-card');
+      let selectedRole = "Doctor";
+      roles.forEach(roleCard => {
+        roleCard.addEventListener('click', () => {
+          roles.forEach(c => c.classList.remove('active'));
+          roleCard.classList.add('active');
+          selectedRole = roleCard.dataset.role;
+          window.PrahariAuth.updateRole(selectedRole);
+          window.PrahariNotifications.show("Roster Role selected", `Registration profile set to ${selectedRole}`, "cyan");
+        });
+      });
+
+      // Password Strength Validator
+      const passInput = document.getElementById('signup-password');
+      const fill = document.getElementById('strength-fill');
+      const label = document.getElementById('strength-label');
+
+      passInput.addEventListener('input', (e) => {
+        const val = e.target.value;
+        if (!val) {
+          fill.style.width = '0%';
+          label.textContent = "Password strength: Empty";
+          return;
+        }
+
+        let strength = 0;
+        if (val.length >= 8) strength += 25;
+        if (/[A-Z]/.test(val)) strength += 25;
+        if (/[0-9]/.test(val)) strength += 25;
+        if (/[^A-Za-z0-9]/.test(val)) strength += 25;
+
+        fill.style.width = `${strength}%`;
+        
+        if (strength <= 25) {
+          fill.style.backgroundColor = 'var(--color-danger)';
+          label.textContent = "Password strength: Weak (Insecure)";
+        } else if (strength <= 75) {
+          fill.style.backgroundColor = 'var(--color-warning)';
+          label.textContent = "Password strength: Moderate";
+        } else {
+          fill.style.backgroundColor = 'var(--color-success)';
+          label.textContent = "Password strength: Strong (DHC Compliant)";
+        }
+      });
+
+      // Form Submission
+      const form = document.getElementById('signup-form');
+      const successPanel = document.getElementById('success-panel');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const displayName = document.getElementById('signup-name').value;
+        const email = document.getElementById('signup-email').value;
+        const password = passInput.value;
+        const btn = document.getElementById('signup-submit-btn');
+
+        btn.disabled = true;
+        btn.textContent = "Writing block to Firestore...";
+
+        try {
+          await window.PrahariAuth.signUpWithEmail(email, password, displayName, selectedRole);
+          
+          successPanel.style.display = 'flex';
+          document.getElementById('provisioned-msg').textContent = `Operator profile created for ${displayName}`;
+          window.PrahariNotifications.show("Secure Provisioning Completed", "Encrypted clinical profiles written successfully.", "success");
+
+          setTimeout(() => {
+            window.location.href = 'dashboard.html';
+          }, 2200);
+        } catch (err) {
+          window.PrahariNotifications.show("Profile Generation Halted", err.message || "Failed to compile metadata", "danger");
+          btn.disabled = false;
+          btn.textContent = "Compile Profile Key";
+        }
+      });
+    </script>
+    <script type="module" src="/script.js"></script>
+  </body>
+</html>

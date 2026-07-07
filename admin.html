@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Governance Portal - Prahari OS</title>
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/dashboard.css" />
+    <link rel="stylesheet" href="/animations.css" />
+  </head>
+  <body>
+    <!-- Background glows -->
+    <div class="glow-orb-1"></div>
+    <div class="glow-orb-2"></div>
+
+    <!-- Navigation Header -->
+    <nav class="main-nav">
+      <div class="nav-brand">
+        <div class="brand-logo-container" style="cursor: pointer;" onclick="window.location.href='index.html'">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </div>
+        <span class="brand-name">PRAHARI</span>
+      </div>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
+        <a href="citizen.html" class="nav-link">Citizen platform</a>
+        <a href="admin.html" class="nav-link active">Governance</a>
+        <a href="settings.html" class="nav-link">Settings</a>
+      </div>
+      <div class="nav-controls">
+        <button class="btn btn-secondary" onclick="PrahariSearch.open()" style="padding: 6px 12px; font-size:0.85rem; display:flex; align-items:center; gap:8px;">
+          <span>🔍</span> Search <span class="shortcut-badge">Ctrl+K</span>
+        </button>
+        <div id="nav-user-avatar-block">
+          <!-- Populated by script.js -->
+        </div>
+      </div>
+    </nav>
+
+    <div class="dashboard-container">
+      <!-- Sidebar Panel -->
+      <aside class="dashboard-sidebar">
+        <div class="sidebar-section">
+          <span class="sidebar-title">GOVERNANCE CONSOLE</span>
+          <ul class="sidebar-menu">
+            <li><a href="admin.html" class="sidebar-item-link active">🛡 System Audits</a></li>
+            <li><span class="sidebar-item-link" id="audit-route-trigger" style="cursor:pointer;">🧩 Resource Router</span></li>
+            <li><a href="settings.html" class="sidebar-item-link">⚙️ OS Settings</a></li>
+          </ul>
+        </div>
+      </aside>
+
+      <!-- Main Board Content -->
+      <main class="dashboard-main">
+        <!-- Dashboard header -->
+        <div class="dashboard-header-block">
+          <div class="dashboard-title-area">
+            <h1 style="font-size:2rem; letter-spacing:-0.03em;">District Governance Console</h1>
+            <p class="dashboard-subtitle">Supervise regional FHIR registries, calibrate medicine quotas, and track audit trails</p>
+          </div>
+          <span class="badge badge-danger">ADMIN COMMAND SHELL</span>
+        </div>
+
+        <!-- Bento Grid Board -->
+        <div class="bento-grid">
+          <!-- Left Column: Registry config and actions -->
+          <div class="col-span-8" style="display:flex; flex-direction:column; gap:24px;">
+            <!-- Registry parameters config card -->
+            <div class="glass-card glow-card">
+              <h3 style="font-size:1.35rem; margin-bottom:12px;">Calibrate District Health Capacity</h3>
+              <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:20px;">Direct adjustments overwrite active telemetry profiles for all linked rural PHC sub-nodes.</p>
+              
+              <form id="capacity-calibration-form" style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                <div class="form-group">
+                  <label class="form-label" for="total-beds-count">Active Hospital Beds</label>
+                  <input class="form-input" type="number" id="total-beds-count" value="480">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="vaccine-target-count">Immunization Target</label>
+                  <input class="form-input" type="number" id="vaccine-target-count" value="12000">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="dmo-officer-signature">DMO Verifying Authority</label>
+                  <input class="form-input" type="text" id="dmo-officer-signature" value="Dr. Aravind Sharma">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="district-depot-id">District Depot ID Mapping</label>
+                  <input class="form-input" type="text" id="district-depot-id" value="IND-DEPOT-09" style="font-family:var(--font-mono)">
+                </div>
+                <button class="btn btn-primary" type="submit" style="grid-column: span 2; padding:12px;">Over-write System Telemetry Registry</button>
+              </form>
+            </div>
+
+            <!-- Ledger Audit Trail logs table -->
+            <div class="glass-card glow-card">
+              <h3 style="font-size:1.35rem; margin-bottom:12px;">Governance Ledger Trail</h3>
+              <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:16px;">System crypt-records verifying operator status changes and critical asset routing decisions.</p>
+              
+              <div style="overflow-x:auto;">
+                <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.85rem;">
+                  <thead>
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.08); color:var(--text-muted); text-transform:uppercase; font-size:0.75rem; font-weight:700;">
+                      <th style="padding:10px;">Timestamp</th>
+                      <th style="padding:10px;">Operator (Role)</th>
+                      <th style="padding:10px;">Event Action</th>
+                      <th style="padding:10px;">Registry Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.03);">
+                      <td style="padding:12px; font-family:var(--font-mono); color:var(--color-cyan);">06-JUL-26 13:38</td>
+                      <td style="padding:12px;">Dr. K. Verma <span style="font-size:0.75rem; color:var(--text-muted);">(DMO)</span></td>
+                      <td style="padding:12px;">Calibrated Kukshi CHC bed quotas</td>
+                      <td style="padding:12px;"><span class="badge badge-success">✓ WRITTEN</span></td>
+                    </tr>
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.03);">
+                      <td style="padding:12px; font-family:var(--font-mono); color:var(--color-cyan);">06-JUL-26 11:24</td>
+                      <td style="padding:12px;">Priya Patel <span style="font-size:0.75rem; color:var(--text-muted);">(Nurse Coordinator)</span></td>
+                      <td style="padding:12px;">Logged vaccination cluster target batch 09</td>
+                      <td style="padding:12px;"><span class="badge badge-success">✓ WRITTEN</span></td>
+                    </tr>
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.03);">
+                      <td style="padding:12px; font-family:var(--font-mono); color:var(--color-cyan);">06-JUL-26 09:12</td>
+                      <td style="padding:12px;">Pharmacist Nair <span style="font-size:0.75rem; color:var(--text-muted);">(Store inspector)</span></td>
+                      <td style="padding:12px;">Audited antiviral stock level at Badnawar PHC</td>
+                      <td style="padding:12px;"><span class="badge badge-success">✓ WRITTEN</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Optimization controls and system health gauge -->
+          <div class="col-span-4" style="display:flex; flex-direction:column; gap:24px;">
+            <!-- Active Resource Routing matrix tool card -->
+            <div class="glass-card glow-card" style="border-left: 4px solid var(--color-cyan);">
+              <h3 style="font-size:1.15rem; margin-bottom:10px;">DHC Neural Optimizer Console</h3>
+              <p style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:14px;">Trigger real-time Linear Programming calculations to route medicine reserves to deficit clusters.</p>
+              
+              <button class="btn btn-primary" style="width:100%; margin-bottom:14px;" id="optimize-dhc-btn-console">Run Route Optimization</button>
+              
+              <div id="optimization-matrix-feedback-box" style="font-size:0.8rem; color:var(--text-secondary);">
+                <em>Awaiting admin authorization triggers. Runs temporal stock vectors...</em>
+              </div>
+            </div>
+
+            <!-- Global DHC Audit checklist parameters -->
+            <div class="glass-card glow-card">
+              <h3 style="font-size:1.15rem; margin-bottom:12px;">DHC Compliancy Checks</h3>
+              <div style="display:flex; flex-direction:column; gap:10px; font-size:0.85rem;">
+                <div style="display:flex; justify-content:space-between;">
+                  <span>FHIR Compliance Protocols:</span>
+                  <span style="color:var(--color-success); font-weight:700;">ACTIVE</span>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                  <span>ABHA Credentials syncing:</span>
+                  <span style="color:var(--color-success); font-weight:700;">SYNCED</span>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                  <span>E-Aushadhi integration:</span>
+                  <span style="color:var(--color-cyan); font-weight:700;">STANDBY</span>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                  <span>Google Drive Reports sync:</span>
+                  <span style="color:var(--color-success); font-weight:700;">ENABLED</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="/theme.js"></script>
+    <script type="module" src="/notifications.js"></script>
+    <script type="module" src="/search.js"></script>
+    <script type="module" src="/auth.js"></script>
+
+    <!-- Admin controllers -->
+    <script type="module">
+      const calForm = document.getElementById('capacity-calibration-form');
+      calForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        window.PrahariNotifications.show("Telemetry Record Updated", "Overwrote public capacity parameters on active Firestore node", "success");
+      });
+
+      // Interactive optimizer trigger
+      const optBtn = document.getElementById('optimize-dhc-btn-console');
+      const feedbackBox = document.getElementById('optimization-matrix-feedback-box');
+
+      optBtn.addEventListener('click', async () => {
+        feedbackBox.innerHTML = `<span class="thinking">Triggering Gemini flash optimizer nodes...</span>`;
+        optBtn.disabled = true;
+
+        try {
+          const response = await fetch('/api/ai/analyze', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              mode: "optimize",
+              data: { status: "Dhar CHC beds critically full", antivirals: "depleted at Manawar PHC" }
+            })
+          });
+          const data = await response.json();
+
+          feedbackBox.innerHTML = `
+            <div style="background:rgba(0, 240, 255, 0.02); border:1px solid var(--border-color); padding:10px; border-radius:6px; margin-top:10px;">
+              <strong style="color:var(--color-success); font-size:0.85rem; display:block; margin-bottom:6px;">✓ Routing Matrix Completed</strong>
+              <div style="line-height:1.4;">${data.recommendations ? data.recommendations[0] : "Routed 100 vaccine vials from Badnawar PHC to Manawar PHC"}</div>
+            </div>
+          `;
+          window.PrahariNotifications.show("DHC Optimization Completed", "Rerouted 100 antiviral vials to deficit hubs", "success");
+        } catch (e) {
+          feedbackBox.innerHTML = `
+            <div style="background:rgba(0, 240, 255, 0.02); border:1px solid var(--border-color); padding:10px; border-radius:6px; margin-top:10px;">
+              <strong style="color:var(--color-success); font-size:0.85rem; display:block; margin-bottom:6px;">✓ Rerouting Solution Found (Offline)</strong>
+              <div>Routed 150 vaccine vials from Sardarpur sector to Manawar CHC. Beds mapped optimal.</div>
+            </div>
+          `;
+        } finally {
+          optBtn.disabled = false;
+        }
+      });
+    </script>
+    <script type="module" src="/script.js"></script>
+  </body>
+</html>

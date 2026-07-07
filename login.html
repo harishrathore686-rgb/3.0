@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Secure Login - Prahari OS</title>
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/auth.css" />
+    <link rel="stylesheet" href="/animations.css" />
+  </head>
+  <body>
+    <!-- Background glows -->
+    <div class="glow-orb-1"></div>
+    <div class="glow-orb-2"></div>
+
+    <div class="auth-wrapper">
+      <div class="auth-card hover-scale">
+        <div class="auth-header">
+          <div class="brand-logo-container" style="width: 48px; height: 48px; border-radius:10px; cursor: pointer;" onclick="window.location.href='index.html'">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+          </div>
+          <h2 class="auth-title">Welcome to Prahari OS</h2>
+          <p class="auth-subtitle">Verify credentials to enter secure command portal</p>
+        </div>
+
+        <!-- Role selection panel -->
+        <div>
+          <label class="form-label" style="text-align:center; margin-bottom:10px;">Select Command Role Profile</label>
+          <div class="role-grid" id="role-selector-grid">
+            <div class="role-card" data-role="Citizen">
+              <div class="role-icon">👤</div>
+              <span class="role-label">Citizen</span>
+            </div>
+            <div class="role-card active" data-role="Doctor">
+              <div class="role-icon">🩺</div>
+              <span class="role-label">Doctor</span>
+            </div>
+            <div class="role-card" data-role="Nurse">
+              <div class="role-icon">🩹</div>
+              <span class="role-label">Nurse</span>
+            </div>
+            <div class="role-card" data-role="Pharmacist">
+              <div class="role-icon">🧪</div>
+              <span class="role-label">Pharmacist</span>
+            </div>
+            <div class="role-card" data-role="District Officer">
+              <div class="role-icon">📡</div>
+              <span class="role-label">Officer</span>
+            </div>
+            <div class="role-card" data-role="Administrator">
+              <div class="role-icon">⚙️</div>
+              <span class="role-label">Admin</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Integrated Google Sign-In with popup -->
+        <div class="google-btn-container">
+          <button class="custom-google-btn" id="google-login-btn">
+            <svg class="google-icon-svg" viewBox="0 0 24 24">
+              <path fill="#EA4335" d="M12 5.04c1.66 0 3.2.57 4.38 1.69l3.27-3.27C17.67 1.47 15.01 1 12 1 7.37 1 3.42 3.67 1.5 7.57l3.79 2.94C6.21 7.03 8.86 5.04 12 5.04z"/>
+              <path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.36H12v4.51h6.46c-.29 1.48-1.14 2.73-2.4 3.58l3.73 2.89c2.18-2.01 3.7-4.99 3.7-8.62z"/>
+              <path fill="#FBBC05" d="M5.29 14.51c-.24-.72-.38-1.48-.38-2.27s.14-1.55.38-2.27L1.5 7.03C.54 8.97 0 11.13 0 13.4s.54 4.43 1.5 6.37l3.79-2.94c-.24-.72-.38-1.48-.38-2.27z"/>
+              <path fill="#34A853" d="M12 23c3.24 0 5.97-1.07 7.96-2.91l-3.73-2.89c-1.12.75-2.54 1.21-4.23 1.21-3.14 0-5.79-1.99-6.71-5.47L1.5 15.88C3.42 19.78 7.37 23 12 23z"/>
+            </svg>
+            <span>Continue with Google Account</span>
+          </button>
+        </div>
+
+        <div class="auth-divider">OR USE EMAIL GATEWAY</div>
+
+        <!-- Classic form credentials login -->
+        <form id="email-login-form">
+          <div class="form-group">
+            <label class="form-label" for="login-email">District Registered Email</label>
+            <input class="form-input" type="email" id="login-email" placeholder="doctor.aravind@gov.in" required autocomplete="username">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="login-password">System Access Password</label>
+            <input class="form-input" type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password">
+          </div>
+
+          <div class="auth-controls">
+            <label class="remember-me">
+              <input type="checkbox" id="remember-checkbox" checked>
+              <span>Keep session open</span>
+            </label>
+            <span class="forgot-password-link" id="forgot-pass-trigger">Forgot Security Key?</span>
+          </div>
+
+          <button class="btn btn-primary" type="submit" style="width:100%; margin-top:20px; padding:12px;" id="login-submit-btn">
+            Decrypt & Authenticate
+          </button>
+        </form>
+
+        <p class="auth-toggle-text">
+          Unregistered operator? <a href="signup.html" class="auth-toggle-link">Provision new credentials</a>
+        </p>
+      </div>
+
+      <!-- Secure Verification Code Modal (OTP) -->
+      <div class="auth-card" id="verification-panel" style="display:none; position:absolute; z-index:20;">
+        <div class="auth-header">
+          <div class="success-icon-container" style="color: var(--color-cyan); border-color: var(--color-cyan); background:rgba(0, 240, 255, 0.1);">
+            🔒
+          </div>
+          <h2 class="auth-title">DHC Security Challenge</h2>
+          <p class="auth-subtitle">A verification key has been sent to your registered credentials</p>
+        </div>
+        <div class="otp-grid">
+          <input type="text" class="otp-input" maxlength="1" id="otp-1">
+          <input type="text" class="otp-input" maxlength="1" id="otp-2">
+          <input type="text" class="otp-input" maxlength="1" id="otp-3">
+          <input type="text" class="otp-input" maxlength="1" id="otp-4">
+        </div>
+        <button class="btn btn-primary" style="width:100%; margin-top:10px;" id="verify-otp-btn">Verify Security Token</button>
+        <span class="auth-toggle-text" style="cursor:pointer;" id="resend-otp-link">Resend secure token (59s)</span>
+      </div>
+
+      <!-- Success Screen -->
+      <div class="auth-card" id="success-panel" style="display:none; position:absolute; z-index:30;">
+        <div class="success-display" style="display:flex;">
+          <div class="success-icon-container">
+            ✓
+          </div>
+          <h2 class="auth-title" style="color:var(--color-success);">Access Authorized</h2>
+          <p class="auth-subtitle" id="authorized-msg">Welcome back, Dr. Aravind Sharma.</p>
+          <div style="font-family:var(--font-mono); font-size:0.75rem; color:var(--text-muted); background:rgba(255,255,255,0.02); padding:10px 20px; border-radius:6px;">
+            Secure token validated • Session open
+          </div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <p style="font-size:0.8rem; color:var(--text-secondary);" class="thinking">Redirecting to command center</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="/theme.js"></script>
+    <script type="module" src="/notifications.js"></script>
+    <script type="module" src="/search.js"></script>
+    <script type="module" src="/auth.js"></script>
+    
+    <!-- Dynamic controller logic for login events -->
+    <script type="module">
+      import { auth, db } from "/auth.js";
+
+      // Role select handles
+      const roles = document.querySelectorAll('.role-card');
+      roles.forEach(roleCard => {
+        roleCard.addEventListener('click', () => {
+          roles.forEach(c => c.classList.remove('active'));
+          roleCard.classList.add('active');
+          const role = roleCard.dataset.role;
+          window.PrahariAuth.updateRole(role);
+          window.PrahariNotifications.show("Profile Role Focus", `Command panel set to ${role} environment`, "cyan");
+        });
+      });
+
+      // Submit Email handler
+      const loginForm = document.getElementById('email-login-form');
+      const verificationPanel = document.getElementById('verification-panel');
+      const successPanel = document.getElementById('success-panel');
+
+      loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('login-email').value;
+        const pass = document.getElementById('login-password').value;
+        const btn = document.getElementById('login-submit-btn');
+
+        btn.disabled = true;
+        btn.textContent = "Decrypting Cyphers...";
+
+        try {
+          await window.PrahariAuth.signInWithEmail(email, pass);
+          // Show Security Verification (OTP) challenge
+          verificationPanel.style.display = 'flex';
+          window.PrahariNotifications.show("Two-Factor Challenge", "Enter the 4-digit verification token sent via secure channel", "warning");
+        } catch (err) {
+          window.PrahariNotifications.show("Verification Blocked", err.message || "Invalid credentials supplied", "danger");
+          btn.disabled = false;
+          btn.textContent = "Decrypt & Authenticate";
+        }
+      });
+
+      // OTP fields focus shifting
+      const otps = document.querySelectorAll('.otp-input');
+      otps.forEach((input, index) => {
+        input.addEventListener('input', (e) => {
+          if (e.target.value.length === 1 && index < otps.length - 1) {
+            otps[index + 1].focus();
+          }
+        });
+      });
+
+      // OTP Verification verify
+      document.getElementById('verify-otp-btn').addEventListener('click', () => {
+        // Mock successful verify
+        verificationPanel.style.display = 'none';
+        successPanel.style.display = 'flex';
+        
+        const profile = window.PrahariAuth.getUserProfile();
+        document.getElementById('authorized-msg').textContent = `Welcome back, ${profile.displayName}.`;
+
+        setTimeout(() => {
+          window.location.href = 'dashboard.html';
+        }, 2200);
+      });
+
+      // Google OAuth Popup Trigger
+      document.getElementById('google-login-btn').addEventListener('click', async () => {
+        try {
+          await window.PrahariAuth.loginWithGoogle();
+          successPanel.style.display = 'flex';
+          const profile = window.PrahariAuth.getUserProfile();
+          document.getElementById('authorized-msg').textContent = `Authorized via Google: ${profile.displayName}.`;
+          
+          setTimeout(() => {
+            window.location.href = 'dashboard.html';
+          }, 2000);
+        } catch (err) {
+          window.PrahariNotifications.show("Google SSO Blocked", err.message || "Could not link Google account", "danger");
+        }
+      });
+    </script>
+    <script type="module" src="/script.js"></script>
+  </body>
+</html>
